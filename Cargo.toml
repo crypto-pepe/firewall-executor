@@ -1,0 +1,42 @@
+[package]
+name = "firewall-executor"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { version = "1.18.1", features = ["rt", "macros", "rt-multi-thread", "tokio-macros"] }
+tokio-util = "0.7.1"
+
+actix = { version = "0.13.0" }
+actix-web = { version = "4.0.1" }
+mime = "0.3.16"
+
+redis = "0.21.5"
+redis-derive = "0.1.5"
+derive-redis-json = "0.1.1"
+
+bb8 = "0.8.0"
+bb8-redis = "0.11.0"
+
+futures-util = "0.3.21"
+
+serde = { version = "1.0.137", features = ["derive"] }
+serde_json = "1.0.81"
+erased-serde = "0.3.20"
+
+slog = { version = "2.7.0", features = ["nested-values"] }
+slog-extlog = "8.0.0"
+slog-extlog-derive = "8.0.0"
+
+pepe-log = "0.0.7"
+pepe-config = "0.0.2"
+
+config = "0.12.0"
+
+either = "1.6.1"
+thiserror = "1.0.31"
+anyhow = "1.0.57"
+async-trait = "0.1.53"
+env_logger = "0.9.0"
