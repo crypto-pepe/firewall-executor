@@ -18,6 +18,10 @@ pub struct BanTarget {
     pub target_type: TargetType,
     pub value: String,
 }
+#[derive(Debug, Serialize, Deserialize)]
+pub struct BanTargetRequest {
+    pub target: BanTarget,
+}
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]

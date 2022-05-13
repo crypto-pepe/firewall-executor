@@ -1,8 +1,4 @@
-use std::time;
-
 use async_trait::async_trait;
-use bb8::Pool;
-use bb8_redis::RedisConnectionManager;
 use futures_util::future::join_all;
 
 use crate::ban_hammer::BanHammer;

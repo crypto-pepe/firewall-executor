@@ -1,8 +1,8 @@
+use crate::errors;
+use crate::redis::redis_config::RedisConfig;
 use bb8::Pool;
 use bb8_redis::RedisConnectionManager;
 use std::sync::Arc;
-use crate::errors;
-use crate::redis::redis_config::RedisConfig;
 
 pub async fn get_pool(cfg: &RedisConfig) -> Result<Pool<RedisConnectionManager>, errors::Redis> {
     let rcm = match RedisConnectionManager::new(cfg.connection_string()) {

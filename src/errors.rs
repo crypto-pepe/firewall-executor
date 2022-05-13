@@ -8,6 +8,7 @@ pub enum BanError {
     #[error(transparent)]
     Error(#[from] Redis),
 }
+
 #[derive(Error, Debug)]
 pub enum CheckBanError {
     #[error(transparent)]
@@ -16,6 +17,12 @@ pub enum CheckBanError {
 
 #[derive(Error, Debug)]
 pub enum Redis {
+    #[error("key '{0}' not found")]
+    KeyNotExist(String),
+
+    #[error("key '{0}' has not ttl")]
+    NoTTL(String),
+
     #[error("execute '{1}': {0:?}")]
     CMD(Arc<RedisError>, String),
 

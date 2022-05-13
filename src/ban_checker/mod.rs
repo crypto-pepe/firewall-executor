@@ -1,6 +1,6 @@
-use async_trait::async_trait;
 use crate::errors;
-use crate::model::{BanEntity, BanTarget};
+use crate::model::BanTarget;
+use async_trait::async_trait;
 
 pub mod redis_impl;
 

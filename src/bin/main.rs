@@ -2,12 +2,11 @@ extern crate core;
 
 use std::io;
 
-use pepe_log::info;
 use firewall_executor::config;
-use firewall_executor::server;
 use firewall_executor::redis::redis_pool::get_pool;
 use firewall_executor::redis::redis_svc::RedisService;
 use firewall_executor::server::server::Server;
+use pepe_log::info;
 
 #[tokio::main]
 async fn main() -> io::Result<()> {

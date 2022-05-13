@@ -11,7 +11,7 @@ pub const DEFAULT_CONFIG: &str = include_str!("../config.yaml");
 #[derive(Clone, Debug, Serialize, Deserialize, SlogValue)]
 pub struct Config {
     pub redis: RedisConfig,
-    pub server: server::Config
+    pub server: server::Config,
 }
 
 impl Config {

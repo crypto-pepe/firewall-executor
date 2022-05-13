@@ -1,5 +1,5 @@
-use slog_extlog_derive::SlogValue;
 use serde::{Deserialize, Serialize};
+use slog_extlog_derive::SlogValue;
 
 #[derive(Clone, Debug, Serialize, Deserialize, SlogValue)]
 #[serde(rename_all = "snake_case")]

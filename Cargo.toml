@@ -41,9 +41,11 @@ anyhow = "1.0.57"
 async-trait = "0.1.53"
 env_logger = "0.9.0"
 
+num-traits = "0.2.15"
+
 [[bin]]
 name = "executor"
-path = "src/bin/executor.rs"
+path = "src/bin/main.rs"
 
 [lib]
 name = "firewall_executor"
