@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
-use actix_web::{App, dev, error, http::StatusCode, HttpResponse, HttpServer, middleware::Logger, post, Responder, web};
 use actix_web::web::Data;
+use actix_web::{
+    dev, error, http::StatusCode, middleware::Logger, post, web, App, HttpResponse, HttpServer,
+    Responder,
+};
 use mime;
 use pepe_log::error;
 use serde::{Deserialize, Serialize};
@@ -9,10 +12,10 @@ use slog_extlog_derive::SlogValue;
 use thiserror::Error;
 use tokio::io;
 
+use crate::ban_hammer::redis_impl::RedisService;
 use crate::ban_hammer::BanHammer;
-use crate::ban_hammer::redis_impl::RedisBanHammer;
-use crate::BanRequest;
 use crate::model::BanEntity;
+use crate::BanRequest;
 
 #[derive(Clone, Debug, Serialize, Deserialize, SlogValue)]
 pub struct Config {
@@ -23,15 +26,15 @@ pub struct Config {
 #[derive(Error, Debug)]
 pub enum ServerError {
     #[error(transparent)]
-    RunError(#[from] io::Error)
+    RunError(#[from] io::Error),
 }
 
-pub struct Server where {
+pub struct Server {
     srv: dev::Server,
 }
 
 impl Server {
-    pub fn new(cfg: &Config, bh: RedisBanHammer) -> Result<Server, io::Error> {
+    pub fn new(cfg: &Config, bh: RedisService) -> Result<Server, io::Error> {
         let bh = Data::from(Arc::new(bh));
 
         let json_cfg = web::JsonConfig::default()
@@ -47,8 +50,8 @@ impl Server {
                 .app_data(json_cfg.clone())
                 .service(process_ban)
         })
-            .bind((cfg.host.clone(), cfg.port))?
-            .run();
+        .bind((cfg.host.clone(), cfg.port))?
+        .run();
         Ok(Server { srv })
     }
 
@@ -61,7 +64,7 @@ impl Server {
 async fn process_ban(
     req: actix_web::HttpRequest,
     ban_req: web::Json<BanRequest>,
-    hammer: Data<RedisBanHammer>,
+    hammer: Data<RedisService>,
 ) -> impl Responder {
     let anl = match req.headers().get("X-Analyzer-Id") {
         None => return HttpResponse::build(StatusCode::BAD_REQUEST).finish(),

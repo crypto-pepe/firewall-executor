@@ -1,12 +1,12 @@
-use std::sync::Arc;
 use bb8::RunError;
 use redis::RedisError;
+use std::sync::Arc;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum BanError {
     #[error(transparent)]
-    Error(#[from] Redis)
+    Error(#[from] Redis),
 }
 
 #[derive(Error, Debug)]

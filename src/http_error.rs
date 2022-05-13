@@ -7,12 +7,12 @@ use serde::Serialize;
 struct ErrorResponse {
     code: u16,
     reason: String,
-    details: BTreeMap<String, String>, // field name -> description, 
+    details: BTreeMap<String, String>, // field name -> description,
 }
 
 #[derive(Debug)]
 pub enum FieldRequiredError {
-    Field(String)
+    Field(String),
 }
 
 impl Display for FieldRequiredError {
@@ -39,11 +39,10 @@ impl ResponseError for FieldRequiredError {
         let mut details = BTreeMap::new();
         details.insert(field_name.to_string(), "This field is required".to_string());
 
-        HttpResponse::build(StatusCode::BAD_REQUEST).json(
-            ErrorResponse {
-                code: 100,
-                reason: "Provided request does not match the constraints".into(),
-                details,
-            })
+        HttpResponse::build(StatusCode::BAD_REQUEST).json(ErrorResponse {
+            code: 100,
+            reason: "Provided request does not match the constraints".into(),
+            details,
+        })
     }
 }

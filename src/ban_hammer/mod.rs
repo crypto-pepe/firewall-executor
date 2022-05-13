@@ -1,7 +1,9 @@
+use crate::{errors, BanEntity};
 use async_trait::async_trait;
-use crate::{BanEntity, errors};
 
+mod redis_cmd;
 pub mod redis_impl;
+pub(crate) mod redis_pool;
 
 #[async_trait]
 pub trait BanHammer {

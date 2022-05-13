@@ -30,8 +30,12 @@ pub struct BanEntity {
 
 impl BanEntity {
     pub fn from(br: BanRequest, analyzer: String) -> Result<Self, FieldRequiredError> {
-        let target = br.target.ok_or(FieldRequiredError::Field("target".to_string()))?;
-        let reason = br.reason.ok_or(FieldRequiredError::Field("reason".to_string()))?;
+        let target = br
+            .target
+            .ok_or(FieldRequiredError::Field("target".to_string()))?;
+        let reason = br
+            .reason
+            .ok_or(FieldRequiredError::Field("reason".to_string()))?;
         let ttl = br.ttl.ok_or(FieldRequiredError::Field("ttl".to_string()))?;
 
         Ok(BanEntity {
