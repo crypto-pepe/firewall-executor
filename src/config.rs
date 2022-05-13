@@ -2,15 +2,15 @@ use config::ConfigError;
 use serde::{Deserialize, Serialize};
 use slog_extlog_derive::SlogValue;
 
-use crate::redis::redis_config::RedisConfig;
+use crate::redis;
 
-use crate::server::server;
+use crate::server;
 
 pub const DEFAULT_CONFIG: &str = include_str!("../config.yaml");
 
 #[derive(Clone, Debug, Serialize, Deserialize, SlogValue)]
 pub struct Config {
-    pub redis: RedisConfig,
+    pub redis: redis::Config,
     pub server: server::Config,
 }
 

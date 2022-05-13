@@ -7,35 +7,21 @@ use actix_web::{
 };
 use mime;
 use pepe_log::error;
-use serde::{Deserialize, Serialize};
 use serde_json::json;
-use slog_extlog_derive::SlogValue;
-use thiserror::Error;
 use tokio::io;
 
 use crate::ban_checker::BanChecker;
 use crate::ban_hammer::BanHammer;
 use crate::model::{BanEntity, BanRequest, BanTargetRequest};
-use crate::redis::redis_svc::RedisService;
-
-#[derive(Clone, Debug, Serialize, Deserialize, SlogValue)]
-pub struct Config {
-    pub host: String,
-    pub port: u16,
-}
-
-#[derive(Error, Debug)]
-pub enum ServerError {
-    #[error(transparent)]
-    RunError(#[from] io::Error),
-}
+use crate::redis::Service;
+use crate::server::Config;
 
 pub struct Server {
     srv: dev::Server,
 }
 
 impl Server {
-    pub fn new(cfg: &Config, bh: RedisService) -> Result<Server, io::Error> {
+    pub fn new(cfg: &Config, bh: Service) -> Result<Server, io::Error> {
         let bh = Data::from(Arc::new(bh));
 
         let json_cfg = web::JsonConfig::default()
@@ -66,7 +52,7 @@ impl Server {
 async fn process_ban(
     req: actix_web::HttpRequest,
     ban_req: web::Json<BanRequest>,
-    hammer: Data<RedisService>,
+    hammer: Data<Service>,
 ) -> impl Responder {
     let anl = match req.headers().get("X-Analyzer-Id") {
         None => return HttpResponse::build(StatusCode::BAD_REQUEST).finish(),
@@ -86,10 +72,7 @@ async fn process_ban(
 }
 
 #[post("/api/check-ban")]
-async fn check_ban(
-    ban_req: web::Json<BanTargetRequest>,
-    checker: Data<RedisService>,
-) -> impl Responder {
+async fn check_ban(ban_req: web::Json<BanTargetRequest>, checker: Data<Service>) -> impl Responder {
     match checker.check(&ban_req.target).await {
         Ok(o) => match o {
             None => HttpResponse::Ok().json(json!({"status":"free"})),

@@ -3,9 +3,9 @@ extern crate core;
 use std::io;
 
 use firewall_executor::config;
-use firewall_executor::redis::redis_pool::get_pool;
-use firewall_executor::redis::redis_svc::RedisService;
-use firewall_executor::server::server::Server;
+use firewall_executor::redis::get_pool;
+use firewall_executor::redis::Service;
+use firewall_executor::server::Server;
 use pepe_log::info;
 
 #[tokio::main]
@@ -24,7 +24,7 @@ async fn main() -> io::Result<()> {
         Err(e) => panic!("create redis pool {:?}", e),
     };
 
-    let red = match RedisService::new(red_pool, cfg.redis.timeout_sec).await {
+    let red = match Service::new(red_pool, cfg.redis.timeout_sec).await {
         Ok(r) => r,
         Err(e) => panic!("can't setup redis {:?}", e),
     };

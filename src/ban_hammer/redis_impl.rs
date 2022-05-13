@@ -5,10 +5,10 @@ use crate::ban_hammer::BanHammer;
 use crate::errors;
 use crate::errors::BanError;
 use crate::model::BanEntity;
-use crate::redis::redis_svc::RedisService;
+use crate::redis::Service;
 
 #[async_trait]
-impl BanHammer for RedisService {
+impl BanHammer for Service {
     async fn ban(&self, be: BanEntity) -> Result<(), BanError> {
         let mut handles = vec![];
 

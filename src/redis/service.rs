@@ -8,18 +8,18 @@ use bb8_redis::RedisConnectionManager;
 use redis::cmd;
 
 #[derive(Clone)]
-pub struct RedisService {
+pub struct Service {
     pub pool: Pool<RedisConnectionManager>,
     pub timeout: time::Duration,
 }
 
-impl RedisService {
+impl Service {
     pub async fn new(
         pool: Pool<RedisConnectionManager>,
         timeout_secs: u64,
     ) -> Result<Self, errors::Redis> {
         let timeout = time::Duration::from_secs(timeout_secs);
-        Ok(RedisService { pool, timeout })
+        Ok(Service { pool, timeout })
     }
 
     pub async fn get_ttl(&self, key: String) -> Result<Option<u64>, errors::Redis> {
