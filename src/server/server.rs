@@ -21,7 +21,15 @@ pub struct Server {
 }
 
 impl Server {
-    pub fn new(cfg: &Config, bh: Service) -> Result<Server, io::Error> {
+    pub fn new(
+        cfg: &Config,
+        bh: Service,
+        with_process_ban: Option<bool>,
+        with_check_ban: Option<bool>,
+    ) -> Result<Server, io::Error> {
+        let with_check_ban = with_check_ban.unwrap_or(true);
+        let with_process_ban = with_process_ban.unwrap_or(true);
+
         let bh = Data::from(Arc::new(bh));
 
         let json_cfg = web::JsonConfig::default()
@@ -35,11 +43,15 @@ impl Server {
                 .wrap(Logger::default())
                 .app_data(bh.clone())
                 .app_data(json_cfg.clone())
-                .service(process_ban)
-                .service(check_ban)
-        })
-        .bind((cfg.host.clone(), cfg.port))?
-        .run();
+        });
+        if with_check_ban {
+            srv.service(check_ban)
+        }
+        if with_process_ban {
+            srv.service(process_ban)
+        }
+
+        let srv = srv.bind((cfg.host.clone(), cfg.port))?.run();
         Ok(Server { srv })
     }
 
@@ -48,7 +60,7 @@ impl Server {
     }
 }
 
-#[post("/api/ban")]
+#[post("/api/bans")]
 async fn process_ban(
     req: actix_web::HttpRequest,
     ban_req: web::Json<BanRequest>,

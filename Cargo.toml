@@ -44,8 +44,16 @@ env_logger = "0.9.0"
 num-traits = "0.2.15"
 
 [[bin]]
-name = "executor"
+name = "main"
 path = "src/bin/main.rs"
+
+[[bin]]
+name = "executor"
+path = "src/bin/executor.rs"
+
+[[bin]]
+name = "api"
+path = "src/bin/api.rs"
 
 [lib]
 name = "firewall_executor"

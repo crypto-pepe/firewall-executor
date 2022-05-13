@@ -29,6 +29,6 @@ async fn main() -> io::Result<()> {
         Err(e) => panic!("can't setup redis {:?}", e),
     };
 
-    let srv = Server::new(&cfg.server, red, Some(true), Some(true))?;
+    let srv = Server::new(&cfg.server, red, None, Some(true))?;
     srv.run().await
 }
