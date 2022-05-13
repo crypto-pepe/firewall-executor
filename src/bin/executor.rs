@@ -3,15 +3,17 @@ extern crate core;
 use std::io;
 
 use pepe_log::info;
-
-#[path = "../config.rs"]
-mod fw_config;
+use firewall_executor::config;
+use firewall_executor::server;
+use firewall_executor::redis::redis_pool::get_pool;
+use firewall_executor::redis::redis_svc::RedisService;
+use firewall_executor::server::server::Server;
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
     info!("start application");
 
-    let cfg = match fw_config::Config::load(fw_config::DEFAULT_CONFIG) {
+    let cfg = match config::Config::load(config::DEFAULT_CONFIG) {
         Ok(a) => a,
         Err(e) => panic!("can't read config {:?}", e),
     };
@@ -28,6 +30,6 @@ async fn main() -> io::Result<()> {
         Err(e) => panic!("can't setup redis {:?}", e),
     };
 
-    let srv = server::Server::new(&cfg.server, red)?;
+    let srv = Server::new(&cfg.server, red)?;
     srv.run().await
 }
