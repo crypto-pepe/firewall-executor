@@ -104,6 +104,10 @@ impl RedisBanHammer {
             }
         };
 
+        cmd("MULTI")
+            .query_async(&mut *conn).await
+            .map_err(|re| errors::Redis::CMD(Arc::new(re), "MULTI".to_string()))?;
+
         cmd("HSET")
             .arg(&key)
             .arg(anl)
@@ -127,6 +131,10 @@ impl RedisBanHammer {
             .query_async(&mut *conn)
             .await
             .map_err(|re| errors::Redis::CMD(Arc::new(re), "EXPIRE GT".to_string()))?;
+
+        cmd("EXEC")
+            .query_async(&mut *conn).await
+            .map_err(|re| errors::Redis::CMD(Arc::new(re), "EXEC".to_string()))?;
 
         Ok(())
     }
