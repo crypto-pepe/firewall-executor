@@ -5,17 +5,19 @@ use actix_web::{
     dev, error, http::StatusCode, middleware::Logger, post, web, App, HttpResponse, HttpServer,
     Responder,
 };
+use actix_web::body::MessageBody;
 use mime;
 use pepe_log::error;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use slog_extlog_derive::SlogValue;
 use thiserror::Error;
 use tokio::io;
 
-use crate::ban_hammer::redis_impl::RedisService;
-use crate::ban_hammer::BanHammer;
-use crate::model::BanEntity;
-use crate::BanRequest;
+use crate::model::{BanEntity, BanRequest, BanTarget};
+use crate::ban_hammer::{BanHammer};
+use crate::ban_checker::{BanChecker};
+use crate::redis::redis_svc::RedisService;
 
 #[derive(Clone, Debug, Serialize, Deserialize, SlogValue)]
 pub struct Config {
@@ -49,9 +51,10 @@ impl Server {
                 .app_data(bh.clone())
                 .app_data(json_cfg.clone())
                 .service(process_ban)
+                .service(check_ban)
         })
-        .bind((cfg.host.clone(), cfg.port))?
-        .run();
+            .bind((cfg.host.clone(), cfg.port))?
+            .run();
         Ok(Server { srv })
     }
 
@@ -76,6 +79,29 @@ async fn process_ban(
     };
     match hammer.ban(ban).await {
         Ok(()) => HttpResponse::NoContent().finish(),
+        Err(e) => {
+            error!("{:?}", e);
+            HttpResponse::InternalServerError().finish()
+        }
+    }
+}
+
+#[post("/api/check-ban")]
+async fn check_ban(
+    req: actix_web::HttpRequest,
+    ban_req: web::Json<BanTarget>,
+    checker: Data<RedisService>,
+) -> impl Responder {
+    let anl = match req.headers().get("X-Analyzer-Id") {
+        None => return HttpResponse::build(StatusCode::BAD_REQUEST).finish(),
+        Some(s) => s.to_str().unwrap().to_string(),
+    };
+
+    match checker.check(&ban_req).await {
+        Ok(o) => match o {
+            None => HttpResponse::Ok().json(json!({"status":"free"})),
+            Some(ttl) => HttpResponse::Ok().json(json!({"status":"banned", "ban_expires_at":ttl})),
+        },
         Err(e) => {
             error!("{:?}", e);
             HttpResponse::InternalServerError().finish()

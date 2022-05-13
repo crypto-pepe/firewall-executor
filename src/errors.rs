@@ -8,6 +8,11 @@ pub enum BanError {
     #[error(transparent)]
     Error(#[from] Redis),
 }
+#[derive(Error, Debug)]
+pub enum CheckBanError {
+    #[error(transparent)]
+    Error(#[from] Redis),
+}
 
 #[derive(Error, Debug)]
 pub enum Redis {

@@ -42,5 +42,9 @@ async-trait = "0.1.53"
 env_logger = "0.9.0"
 
 [[bin]]
-name = "service"
-path = "src/main.rs"
+name = "executor"
+path = "src/bin/executor.rs"
+
+[lib]
+name = "firewall_executor"
+path = "src/lib.rs"

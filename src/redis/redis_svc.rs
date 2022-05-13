@@ -1,10 +1,17 @@
-use crate::{errors, RedisService};
 use std::sync::Arc;
 use std::time;
 
 use bb8::Pool;
 use bb8_redis::RedisConnectionManager;
 use redis::cmd;
+use crate::errors;
+
+
+#[derive(Clone)]
+pub struct RedisService {
+    pub pool: Pool<RedisConnectionManager>,
+    pub timeout: time::Duration,
+}
 
 impl RedisService {
     pub async fn new(

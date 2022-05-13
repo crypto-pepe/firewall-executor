@@ -4,17 +4,8 @@ use std::io;
 
 use pepe_log::info;
 
-use crate::ban_hammer::redis_impl::RedisService;
-use crate::ban_hammer::redis_pool::get_pool;
-use crate::model::{BanEntity, BanRequest};
-
-mod ban_hammer;
-mod errors;
-#[path = "config.rs"]
+#[path = "../config.rs"]
 mod fw_config;
-mod http_error;
-mod model;
-mod server;
 
 #[tokio::main]
 async fn main() -> io::Result<()> {

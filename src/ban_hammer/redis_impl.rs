@@ -9,12 +9,7 @@ use crate::ban_hammer::BanHammer;
 use crate::errors;
 use crate::errors::BanError;
 use crate::model::BanEntity;
-
-#[derive(Clone)]
-pub struct RedisService {
-    pub(crate) pool: Pool<RedisConnectionManager>,
-    pub(crate) timeout: time::Duration,
-}
+use crate::redis::redis_svc::RedisService;
 
 #[async_trait]
 impl BanHammer for RedisService {
