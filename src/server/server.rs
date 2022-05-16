@@ -8,10 +8,9 @@ use mime;
 use pepe_log::error;
 use tokio::io;
 
-use crate::ban_hammer::BanHammer;
 use crate::ban_hammer::redis::RedisBanHammer;
+use crate::ban_hammer::BanHammer;
 use crate::model::{BanEntity, BanRequest};
-use crate::redis::Service;
 use crate::server::Config;
 
 pub struct Server {
@@ -19,7 +18,7 @@ pub struct Server {
 }
 
 impl Server {
-    pub fn new(cfg: &Config, bh: Service) -> Result<Server, io::Error> {
+    pub fn new(cfg: &Config, bh: RedisBanHammer) -> Result<Server, io::Error> {
         let bh = Data::from(Arc::new(bh));
 
         let srv =
