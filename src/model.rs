@@ -73,7 +73,7 @@ pub fn target_to_key(bt: &Vec<BanTarget>) -> Result<String, BanTargetConversionE
 }
 
 impl BanEntity {
-    pub fn from(br: BanRequest, analyzer: String) -> Result<Self, BanTargetConversionError> {
+    pub fn new(br: BanRequest, analyzer: String) -> Result<Self, BanTargetConversionError> {
         let target = br.target.ok_or(BanTargetConversionError::FieldRequired(
             "target".to_string(),
         ))?;

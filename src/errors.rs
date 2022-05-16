@@ -11,14 +11,8 @@ pub enum BanError {
 
 #[derive(Error, Debug)]
 pub enum Redis {
-    #[error("key '{0}' not found")]
-    KeyNotExist(String),
-
-    #[error("key '{0}' has not ttl")]
-    NoTTL(String),
-
-    #[error("execute '{1}': {0:?}")]
-    CMD(Arc<RedisError>, String),
+    #[error("execute '{1:?}': {0:?}")]
+    Pipeline(Arc<RedisError>, Vec<String>),
 
     #[error("get connection: {0:?}")]
     GetConnection(Arc<RunError<RedisError>>),

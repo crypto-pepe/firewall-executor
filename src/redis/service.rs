@@ -1,10 +1,10 @@
 use std::sync::Arc;
 use std::time;
 
-use crate::errors;
 use bb8::Pool;
 use bb8_redis::RedisConnectionManager;
-use redis::cmd;
+
+use crate::errors;
 
 #[derive(Clone)]
 pub struct Service {
@@ -49,39 +49,16 @@ impl Service {
             }
         };
 
-        cmd("MULTI")
-            .query_async(&mut *conn)
-            .await
-            .map_err(|re| errors::Redis::CMD(Arc::new(re), "MULTI".to_string()))?;
-
-        cmd("HSET")
-            .arg(&key)
-            .arg(anl)
-            .arg(reason)
-            .query_async(&mut *conn)
-            .await
-            .map_err(|re| errors::Redis::CMD(Arc::new(re), "HSET".to_string()))?;
-
-        cmd("EXPIRE")
-            .arg(&key)
-            .arg(ttl)
-            .arg("NX")
-            .query_async(&mut *conn)
-            .await
-            .map_err(|re| errors::Redis::CMD(Arc::new(re), "EXPIRE NX".to_string()))?;
-
-        cmd("EXPIRE")
-            .arg(&key)
-            .arg(ttl)
-            .arg("GT")
-            .query_async(&mut *conn)
-            .await
-            .map_err(|re| errors::Redis::CMD(Arc::new(re), "EXPIRE GT".to_string()))?;
-
-        cmd("EXEC")
-            .query_async(&mut *conn)
-            .await
-            .map_err(|re| errors::Redis::CMD(Arc::new(re), "EXEC".to_string()))?;
+        #[rustfmt::skip]
+        redis::pipe()
+            .atomic()
+            .hset(&key, anl, reason).ignore()
+            .expire(&key, ttl as usize).arg("NX").ignore()
+            .expire(&key, ttl as usize).arg("GT").ignore()
+            .query_async(&mut *conn).await
+            .map_err(|re| errors::Redis::Pipeline(
+                Arc::from(re),
+                vec!["HSET".into(), "EXPIRE NX".into(), "EXPIRE GT".into()]))?;
 
         Ok(())
     }

@@ -54,7 +54,7 @@ async fn process_ban(
         None => return HttpResponse::build(StatusCode::BAD_REQUEST).finish(),
         Some(s) => s.to_str().unwrap().to_string(),
     };
-    let ban = match BanEntity::from(ban_req.0, anl.clone()) {
+    let ban = match BanEntity::new(ban_req.0, anl.clone()) {
         Ok(b) => b,
         Err(fe) => return fe.into(),
     };
