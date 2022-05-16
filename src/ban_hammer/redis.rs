@@ -1,12 +1,14 @@
 use std::sync::Arc;
+use std::time;
 
 use async_trait::async_trait;
+use bb8::Pool;
+use bb8_redis::RedisConnectionManager;
 
 use crate::ban_hammer::BanHammer;
 use crate::errors;
 use crate::errors::BanError;
 use crate::model::BanEntity;
-use crate::redis::Service;
 
 #[async_trait]
 impl BanHammer for RedisBanHammer {
@@ -22,11 +24,21 @@ impl BanHammer for RedisBanHammer {
     }
 }
 
+#[derive(Clone)]
 pub struct RedisBanHammer {
-    redis: Service,
+    pub pool: Pool<RedisConnectionManager>,
+    pub timeout: time::Duration,
 }
 
 impl RedisBanHammer {
+    pub async fn new(
+        pool: Pool<RedisConnectionManager>,
+        timeout_secs: u64,
+    ) -> Result<Self, errors::Redis> {
+        let timeout = time::Duration::from_secs(timeout_secs);
+        Ok(RedisBanHammer { pool, timeout })
+    }
+
     async fn store(
         &self,
         key: String,
@@ -34,7 +46,7 @@ impl RedisBanHammer {
         reason: String,
         ttl: u32,
     ) -> Result<(), errors::Redis> {
-        tokio::time::timeout(self.redis.timeout, self._store(key, anl, reason, ttl))
+        tokio::time::timeout(self.timeout, self._store(key, anl, reason, ttl))
             .await
             .map_err(|_| errors::Redis::Timeout)?
     }
@@ -46,7 +58,7 @@ impl RedisBanHammer {
         reason: String,
         ttl: u32,
     ) -> Result<(), errors::Redis> {
-        let pool = self.redis.pool.clone();
+        let pool = self.pool.clone();
 
         let mut conn = match pool.get().await {
             Ok(c) => c,
