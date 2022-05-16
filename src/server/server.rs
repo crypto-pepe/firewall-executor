@@ -96,7 +96,7 @@ async fn check_ban(ban_req: web::Json<BanTargetRequest>, checker: Data<Service>)
         Err(e) => return e.into(),
     };
 
-    match checker.check(target).await {
+    match checker.ban_ttl(target).await {
         Ok(o) => match o {
             None => HttpResponse::Ok().json(json!({"status":"free"})),
             Some(ttl) => HttpResponse::Ok().json(json!({"status":"banned", "ban_expires_at":ttl})),

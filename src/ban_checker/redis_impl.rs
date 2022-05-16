@@ -7,7 +7,7 @@ use crate::redis::Service;
 
 #[async_trait]
 impl BanChecker for Service {
-    async fn check(&self, bt: String) -> Result<Option<u64>, CheckBanError> {
+    async fn ban_ttl(&self, bt: String) -> Result<Option<u64>, CheckBanError> {
         return match self.get_ttl(bt).await {
             Ok(ttl) => Ok(ttl),
             Err(e) => match e {
