@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use futures_util::future::join_all;
 
 use crate::ban_hammer::BanHammer;
 use crate::errors;
@@ -10,23 +9,13 @@ use crate::redis::Service;
 #[async_trait]
 impl BanHammer for Service {
     async fn ban(&self, be: BanEntity) -> Result<(), BanError> {
-        let mut handles = vec![];
-
-        for bt in &be.target {
-            handles.push(self.store(
-                bt.value.clone(),
-                be.analyzer.clone(),
-                be.reason.clone(),
-                be.ttl,
-            ));
-        }
-
-        let jh = join_all(handles).await;
-
-        jh.into_iter()
-            .collect::<Result<Vec<_>, errors::Redis>>()
-            .map_err(|e| errors::BanError::Error(e))?;
-
-        Ok(())
+        self.store(
+            be.target.clone(),
+            be.analyzer.clone(),
+            be.reason.clone(),
+            be.ttl,
+        )
+        .await
+        .map_err(|e| errors::BanError::Error(e))
     }
 }
