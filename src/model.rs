@@ -56,11 +56,15 @@ pub fn target_to_key(bt: &Vec<BanTarget>) -> Result<String, BanTargetConversionE
         }
     }
 
-    let target = TARGET_TYPE_ORDER.into_iter().fold(String::new(), |res: String, t| {
-        if let Some(v) = bt_value.get(&*t.to_string()) {
-            format!("{}{}{}", res, t, v)
-        } else { res }
-    });
+    let target = TARGET_TYPE_ORDER
+        .into_iter()
+        .fold(String::new(), |res: String, t| {
+            if let Some(v) = bt_value.get(&*t.to_string()) {
+                format!("{}{}{}", res, t, v)
+            } else {
+                res
+            }
+        });
 
     if target.is_empty() {
         return Err(BanTargetConversionError::InvalidTypeCount);
@@ -98,11 +102,10 @@ pub struct BanRequest {
     pub ttl: Option<u32>,
 }
 
-
 #[cfg(test)]
 mod tests {
     use crate::http_error::BanTargetConversionError;
-    use crate::model::{BanTarget, target_to_key, TargetType};
+    use crate::model::{target_to_key, BanTarget, TargetType};
 
     struct TestCase {
         pub input: Vec<BanTarget>,
@@ -151,7 +154,8 @@ mod tests {
                 },
                 BanTarget {
                     target_type: TargetType::UserAgent,
-                    value: "Mozilla/5.0 (Android 4.4; Mobile; rv:41.0) Gecko/41.0 Firefox/41.0".into(),
+                    value: "Mozilla/5.0 (Android 4.4; Mobile; rv:41.0) Gecko/41.0 Firefox/41.0"
+                        .into(),
                 },
                 BanTarget {
                     target_type: TargetType::UserAgent,
