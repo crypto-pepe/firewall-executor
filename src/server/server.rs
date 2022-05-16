@@ -9,6 +9,7 @@ use pepe_log::error;
 use tokio::io;
 
 use crate::ban_hammer::BanHammer;
+use crate::ban_hammer::redis::RedisBanHammer;
 use crate::model::{BanEntity, BanRequest};
 use crate::redis::Service;
 use crate::server::Config;
@@ -48,7 +49,7 @@ fn server_config() -> Box<dyn Fn(&mut web::ServiceConfig)> {
 async fn process_ban(
     req: actix_web::HttpRequest,
     ban_req: web::Json<BanRequest>,
-    hammer: Data<Service>,
+    hammer: Data<RedisBanHammer>,
 ) -> impl Responder {
     let anl = match req.headers().get("X-Analyzer-Id") {
         None => return HttpResponse::build(StatusCode::BAD_REQUEST).finish(),
