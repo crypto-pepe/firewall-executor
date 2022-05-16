@@ -25,11 +25,11 @@ async fn main() -> io::Result<()> {
         Err(e) => panic!("create redis pool {:?}", e),
     };
 
-    let red = match Service::new(redis_pool, cfg.redis.timeout_sec).await {
+    let redis_svc = match Service::new(redis_pool, cfg.redis.timeout_sec).await {
         Ok(r) => r,
         Err(e) => panic!("can't setup redis {:?}", e),
     };
 
-    let srv = Server::new(&cfg.server, red, Some(true), Some(false))?;
+    let srv = Server::new(&cfg.server, redis_svc)?;
     srv.run().await
 }

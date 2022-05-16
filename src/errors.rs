@@ -10,12 +10,6 @@ pub enum BanError {
 }
 
 #[derive(Error, Debug)]
-pub enum CheckBanError {
-    #[error(transparent)]
-    Error(#[from] Redis),
-}
-
-#[derive(Error, Debug)]
 pub enum Redis {
     #[error("key '{0}' not found")]
     KeyNotExist(String),

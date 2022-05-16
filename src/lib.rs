@@ -1,4 +1,3 @@
-mod ban_checker;
 pub mod ban_hammer;
 pub mod config;
 pub mod errors;
