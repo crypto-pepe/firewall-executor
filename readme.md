@@ -4,7 +4,6 @@ Implements [this](https://github.com/crypto-pepe/firewall/wiki/Banned-Targets#ch
 
 ## Binaries
 - executor: `POST /api/bans`
-- api: `POST /api/check-ban`
 
 ## ENVs
 - `CONFIG_PATH`
