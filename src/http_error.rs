@@ -10,7 +10,7 @@ struct ErrorResponse {
     details: Option<BTreeMap<String, String>>, // field name -> description,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum BanTargetConversionError {
     FieldRequired(String),
     InvalidTypeCount,

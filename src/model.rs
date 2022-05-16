@@ -97,3 +97,99 @@ pub struct BanRequest {
     pub reason: Option<String>,
     pub ttl: Option<u32>,
 }
+
+
+#[cfg(test)]
+mod tests {
+    use crate::http_error::BanTargetConversionError;
+    use crate::model::{BanTarget, target_to_key, TargetType};
+
+    struct TestCase {
+        pub input: Vec<BanTarget>,
+        pub want: Result<String, BanTargetConversionError>,
+    }
+
+    #[test]
+    fn target_to_key_ip_only() {
+        let tc = TestCase {
+            input: vec![BanTarget {
+                target_type: TargetType::IP,
+                value: "1.1.1.1".into(),
+            }],
+            want: Ok("ip1.1.1.1".into()),
+        };
+
+        assert_eq!(target_to_key(&tc.input), tc.want);
+    }
+
+    #[test]
+    fn target_to_key_ip_and_user_agent() {
+        let tc = TestCase {
+            input: vec![
+                BanTarget {
+                    target_type: TargetType::IP,
+                    value: "1.1.1.1".into(),
+                },
+                BanTarget {
+                    target_type: TargetType::UserAgent,
+                    value: "Mozilla/5.0 (Android 4.4; Mobile; rv:41.0) Gecko/41.0 Firefox/41.0".into(),
+                },
+            ],
+            want: Ok("ip1.1.1.1user-agentMozilla/5.0 (Android 4.4; Mobile; rv:41.0) Gecko/41.0 Firefox/41.0".into()),
+        };
+
+        assert_eq!(target_to_key(&tc.input), tc.want);
+    }
+
+    #[test]
+    fn target_to_key_ip_and_2_user_agent() {
+        let tc = TestCase {
+            input: vec![
+                BanTarget {
+                    target_type: TargetType::IP,
+                    value: "1.1.1.1".into(),
+                },
+                BanTarget {
+                    target_type: TargetType::UserAgent,
+                    value: "Mozilla/5.0 (Android 4.4; Mobile; rv:41.0) Gecko/41.0 Firefox/41.0".into(),
+                },
+                BanTarget {
+                    target_type: TargetType::UserAgent,
+                    value: "Some other user-agent".into(),
+                },
+            ],
+            want: Err(BanTargetConversionError::InvalidTypeCount),
+        };
+
+        assert_eq!(target_to_key(&tc.input), tc.want);
+    }
+
+    #[test]
+    fn target_to_key_2_ip() {
+        let tc = TestCase {
+            input: vec![
+                BanTarget {
+                    target_type: TargetType::IP,
+                    value: "1.1.1.1".into(),
+                },
+                BanTarget {
+                    target_type: TargetType::IP,
+                    value: "2.2.2.2".into(),
+                },
+            ],
+            want: Err(BanTargetConversionError::InvalidTypeCount),
+        };
+
+        assert_eq!(target_to_key(&tc.input), tc.want);
+    }
+
+    #[test]
+    fn target_to_key_empty() {
+        let tc = TestCase {
+            input: vec![],
+            want: Err(BanTargetConversionError::InvalidTypeCount),
+        };
+
+        assert_eq!(target_to_key(&tc.input), tc.want);
+    }
+}
