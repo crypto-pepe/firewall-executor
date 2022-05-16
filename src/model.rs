@@ -56,15 +56,12 @@ pub fn target_to_key(bt: &Vec<BanTarget>) -> Result<String, BanTargetConversionE
         }
     }
 
-    // todo rewrite with constructor
-
-    let mut target: String = "".to_string();
-
-    for t in TARGET_TYPE_ORDER {
+    let target = TARGET_TYPE_ORDER.into_iter().fold(String::new(), |res: String, t| {
         if let Some(v) = bt_value.get(&*t.to_string()) {
-            target = format!("{}{}{}", target, t, v)
-        }
-    }
+            format!("{}{}{}", res, t, v)
+        } else { res }
+    });
+
     if target.is_empty() {
         return Err(BanTargetConversionError::InvalidTypeCount);
     }

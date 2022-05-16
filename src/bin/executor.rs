@@ -2,11 +2,12 @@ extern crate core;
 
 use std::io;
 
+use pepe_log::info;
+
 use firewall_executor::config;
 use firewall_executor::redis::get_pool;
 use firewall_executor::redis::Service;
 use firewall_executor::server::Server;
-use pepe_log::info;
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
@@ -29,6 +30,6 @@ async fn main() -> io::Result<()> {
         Err(e) => panic!("can't setup redis {:?}", e),
     };
 
-    let srv = Server::new(&cfg.server, red, Some(true), None)?;
+    let srv = Server::new(&cfg.server, red, Some(true), Some(false))?;
     srv.run().await
 }
