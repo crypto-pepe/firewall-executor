@@ -22,11 +22,11 @@ server:
   port: 8000
 ```
 
-| Name              | Required | Note                                    |
-|-------------------|----------|-----------------------------------------|
-| redis.host        | Yes      | Host, where redis is running            |
-| redis.port        | Yes      | Port, on which redis is running         |
-| redis.timeout_sec | Yes      | Timeout in seconds for redis connection |
-| server.host       | Yes      | On what host run this app               |
-| server.port       | Yes      | On which port to run this app           |
+| Name              | Required | Note                               |
+|-------------------|----------|------------------------------------|
+| redis.host        | Yes      | Redis service host                 |
+| redis.port        | Yes      | Redis service port                 |
+| redis.timeout_sec | Yes      | Redis connection timeout (seconds) |
+| server.host       | Yes      | Firewall service host              |
+| server.port       | Yes      | Firewall service port              |
 
