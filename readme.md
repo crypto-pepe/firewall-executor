@@ -1,6 +1,6 @@
 # Firewall-executor
 
-Implements `POST /api/bans` from [this](https://github.com/crypto-pepe/firewall/wiki/Banned-Targets#check-targets-ban)
+Implements `POST /api/bans` from [this](https://github.com/crypto-pepe/firewall/wiki/Banned-Targets#ban-target)
 api
 
 ## ENVs
