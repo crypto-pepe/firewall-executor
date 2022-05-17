@@ -18,10 +18,10 @@ pub enum BanTargetConversionError {
 
 impl Display for BanTargetConversionError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        return match self {
+        match self {
             BanTargetConversionError::FieldRequired(field_name) => f.write_str(field_name),
             BanTargetConversionError::InvalidTypeCount => f.write_str("invalid type count"),
-        };
+        }
     }
 }
 

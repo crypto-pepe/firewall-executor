@@ -21,7 +21,7 @@ impl BanHammer for RedisBanHammer {
             be.ttl,
         )
         .await
-        .map_err(|e| errors::BanError::Error(e))
+        .map_err(errors::BanError::Error)
     }
 }
 

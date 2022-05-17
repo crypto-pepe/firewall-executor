@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::http_error::BanTargetConversionError;
 
-const TARGET_TYPE_ORDER: &'static [TargetType] = &[TargetType::IP, TargetType::UserAgent];
+const TARGET_TYPE_ORDER: &[TargetType] = &[TargetType::IP, TargetType::UserAgent];
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum TargetType {
@@ -57,7 +57,7 @@ pub fn target_to_key(bt: &Vec<BanTarget>) -> Result<String, BanTargetConversionE
     }
 
     let target = TARGET_TYPE_ORDER
-        .into_iter()
+        .iter()
         .fold(String::new(), |res: String, t| {
             if let Some(v) = bt_value.get(&*t.to_string()) {
                 format!("{}{}{}", res, t, v)
@@ -74,15 +74,15 @@ pub fn target_to_key(bt: &Vec<BanTarget>) -> Result<String, BanTargetConversionE
 
 impl BanEntity {
     pub fn new(br: BanRequest, analyzer: String) -> Result<Self, BanTargetConversionError> {
-        let target = br.target.ok_or(BanTargetConversionError::FieldRequired(
-            "target".to_string(),
-        ))?;
-        let reason = br.reason.ok_or(BanTargetConversionError::FieldRequired(
-            "reason".to_string(),
-        ))?;
+        let target = br
+            .target
+            .ok_or_else(|| BanTargetConversionError::FieldRequired("target".to_string()))?;
+        let reason = br
+            .reason
+            .ok_or_else(|| BanTargetConversionError::FieldRequired("reason".to_string()))?;
         let ttl = br
             .ttl
-            .ok_or(BanTargetConversionError::FieldRequired("ttl".to_string()))?;
+            .ok_or_else(|| BanTargetConversionError::FieldRequired("ttl".to_string()))?;
 
         let target = target_to_key(&target)?;
         Ok(BanEntity {
