@@ -21,8 +21,7 @@ pub fn get_subscriber(cfg: &Config) -> Box<dyn Subscriber + Send + Sync> {
 
     if cfg.jaeger_endpoint.is_some() {
         let ep = cfg.jaeger_endpoint.as_ref().unwrap();
-        let ep_ = format!("{}", ep);
-        let tracer = init_tracer(cfg.svc_name.to_string(), ep_.into());
+        let tracer = init_tracer(cfg.svc_name.to_string(), ep.into());
         Box::new(reg.with(tracing_opentelemetry::layer().with_tracer(tracer)))
     } else {
         Box::new(reg)
