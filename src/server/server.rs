@@ -5,8 +5,8 @@ use actix_web::{
     dev, error, http::StatusCode, post, web, App, HttpResponse, HttpServer, Responder,
 };
 use mime;
-use pepe_log::error;
 use tokio::io;
+use tracing_actix_web::TracingLogger;
 
 use crate::ban_hammer::redis::RedisBanHammer;
 use crate::ban_hammer::BanHammer;
@@ -21,8 +21,12 @@ impl Server {
     pub fn new(cfg: &Config, bh: RedisBanHammer) -> Result<Server, io::Error> {
         let bh = Data::from(Arc::new(bh));
 
-        let srv =
-            HttpServer::new(move || App::new().app_data(bh.clone()).configure(server_config()));
+        let srv = HttpServer::new(move || {
+            App::new()
+                .app_data(bh.clone())
+                .configure(server_config())
+                .wrap(TracingLogger::default())
+        });
 
         let srv = srv.bind((cfg.host.clone(), cfg.port))?.run();
         Ok(Server { srv })
@@ -44,6 +48,7 @@ fn server_config() -> Box<dyn Fn(&mut web::ServiceConfig)> {
     })
 }
 
+#[tracing::instrument(skip(req, hammer))]
 #[post("/api/bans")]
 async fn process_ban(
     req: actix_web::HttpRequest,
@@ -61,7 +66,7 @@ async fn process_ban(
     match hammer.ban(ban).await {
         Ok(()) => HttpResponse::NoContent().finish(),
         Err(e) => {
-            error!("{:?}", e);
+            tracing::error!("ban target: {:?}", e);
             HttpResponse::InternalServerError().finish()
         }
     }

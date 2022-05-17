@@ -12,6 +12,7 @@ use crate::model::BanEntity;
 
 #[async_trait]
 impl BanHammer for RedisBanHammer {
+    #[tracing::instrument(skip(self))]
     async fn ban(&self, be: BanEntity) -> Result<(), BanError> {
         self.store(
             be.target.clone(),
@@ -39,6 +40,7 @@ impl RedisBanHammer {
         Ok(RedisBanHammer { pool, timeout })
     }
 
+    #[tracing::instrument(skip(self))]
     async fn store(
         &self,
         key: String,
@@ -51,6 +53,7 @@ impl RedisBanHammer {
             .map_err(|_| errors::Redis::Timeout)?
     }
 
+    #[tracing::instrument(skip(self))]
     async fn _store(
         &self,
         key: String,

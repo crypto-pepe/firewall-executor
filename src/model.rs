@@ -102,6 +102,12 @@ pub struct BanRequest {
     pub ttl: Option<u32>,
 }
 
+impl Display for BanRequest {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(serde_json::to_string(self).unwrap().as_str())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::http_error::BanTargetConversionError;
