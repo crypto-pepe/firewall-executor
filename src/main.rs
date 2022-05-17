@@ -25,11 +25,11 @@ async fn main() -> io::Result<()> {
         Err(e) => panic!("create redis pool {:?}", e),
     };
 
-    let redis_svc = match RedisBanHammer::new(redis_pool, cfg.redis.timeout_sec).await {
+    let rbh = match RedisBanHammer::new(redis_pool, cfg.redis.timeout_sec).await {
         Ok(r) => r,
         Err(e) => panic!("can't setup redis {:?}", e),
     };
 
-    let srv = Server::new(&cfg.server, redis_svc)?;
+    let srv = Server::new(&cfg.server, rbh)?;
     srv.run().await
 }
