@@ -32,12 +32,9 @@ pub struct RedisBanHammer {
 }
 
 impl RedisBanHammer {
-    pub async fn new(
-        pool: Pool<RedisConnectionManager>,
-        timeout_secs: u64,
-    ) -> Result<Self, errors::Redis> {
+    pub fn new(pool: Pool<RedisConnectionManager>, timeout_secs: u64) -> Self {
         let timeout = time::Duration::from_secs(timeout_secs);
-        Ok(RedisBanHammer { pool, timeout })
+        RedisBanHammer { pool, timeout }
     }
 
     #[tracing::instrument(skip(self))]

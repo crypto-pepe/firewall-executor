@@ -1,5 +1,3 @@
-extern crate core;
-
 use std::io;
 
 use pepe_log::info;
@@ -28,10 +26,7 @@ async fn main() -> io::Result<()> {
         Err(e) => panic!("create redis pool {:?}", e),
     };
 
-    let rbh = match RedisBanHammer::new(redis_pool, cfg.redis.timeout_sec).await {
-        Ok(r) => r,
-        Err(e) => panic!("can't setup redis {:?}", e),
-    };
+    let rbh = RedisBanHammer::new(redis_pool, cfg.redis.timeout_sec);
 
     let srv = Server::new(&cfg.server, rbh)?;
     srv.run().await

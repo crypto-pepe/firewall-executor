@@ -57,9 +57,15 @@ async fn process_ban(
 ) -> impl Responder {
     let anl = match req.headers().get("X-Analyzer-Id") {
         None => return HttpResponse::build(StatusCode::BAD_REQUEST).finish(),
-        Some(s) => s.to_str().unwrap().to_string(),
+        Some(s) => match s.to_str() {
+            Ok(s) => s,
+            Err(e) => {
+                tracing::error!("convert analyzer header: {:?}", e);
+                return HttpResponse::build(StatusCode::BAD_REQUEST).finish();
+            }
+        },
     };
-    let ban = match BanEntity::new(ban_req.0, anl.clone()) {
+    let ban = match BanEntity::new(ban_req.0, anl.to_string()) {
         Ok(b) => b,
         Err(fe) => return fe.into(),
     };

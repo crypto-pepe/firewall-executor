@@ -10,8 +10,7 @@ pub mod config;
 pub use self::config::Config;
 
 pub fn get_subscriber(cfg: &Config) -> Box<dyn Subscriber + Send + Sync> {
-    let env_filter = EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| EnvFilter::new("info"));
+    let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
     let formatting_layer = BunyanFormattingLayer::new(cfg.svc_name.to_string(), std::io::stdout);
 
     let reg = Registry::default()
