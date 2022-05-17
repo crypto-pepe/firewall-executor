@@ -13,7 +13,10 @@ use firewall_executor::server::Server;
 async fn main() -> io::Result<()> {
     info!("start application");
 
-    let cfg = config::Config::load().expect("can't read config");
+    let cfg = match config::Config::load() {
+        Ok(c) => c,
+        Err(e) => panic!("can't read config {:?}", e)
+    };
 
     info!("config loaded"; "config" => &cfg);
 
