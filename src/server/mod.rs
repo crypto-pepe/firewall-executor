@@ -1,5 +1,6 @@
 pub mod config;
-pub mod r#impl;
+#[allow(clippy::module_inception)]
+pub mod server;
 
 pub use self::config::Config;
-pub use self::r#impl::Server;
+pub use self::server::Server;

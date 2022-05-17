@@ -1,7 +1,5 @@
 use std::io;
 
-use pepe_log::info;
-
 use firewall_executor::ban_hammer::redis::RedisBanHammer;
 use firewall_executor::config;
 use firewall_executor::redis::get_pool;
@@ -10,14 +8,14 @@ use firewall_executor::telemetry;
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
-    info!("start application");
+    tracing::info!("start application");
 
     let cfg = match config::Config::load() {
         Ok(c) => c,
         Err(e) => panic!("can't read config {:?}", e),
     };
 
-    info!("config loaded"; "config" => &cfg);
+    tracing::info!("config loaded; config={:?}", &cfg);
     let subscriber = telemetry::get_subscriber(&cfg.telemetry);
     telemetry::init_subscriber(subscriber);
 

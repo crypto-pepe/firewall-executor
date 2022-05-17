@@ -12,6 +12,7 @@ use crate::ban_hammer::redis::RedisBanHammer;
 use crate::ban_hammer::BanHammer;
 use crate::model::{BanEntity, BanRequest};
 use crate::server::Config;
+use crate::ANALYZER_HEADER;
 
 pub struct Server {
     srv: dev::Server,
@@ -55,7 +56,7 @@ async fn process_ban(
     ban_req: web::Json<BanRequest>,
     hammer: Data<RedisBanHammer>,
 ) -> impl Responder {
-    let anl = match req.headers().get("X-Analyzer-Id") {
+    let anl = match req.headers().get(ANALYZER_HEADER) {
         None => return HttpResponse::build(StatusCode::BAD_REQUEST).finish(),
         Some(s) => match s.to_str() {
             Ok(s) => s,
