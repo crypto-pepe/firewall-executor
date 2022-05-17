@@ -5,5 +5,4 @@ use slog_extlog_derive::SlogValue;
 pub struct Config {
     pub svc_name: String,
     pub jaeger_endpoint: Option<String>,
-    pub lvl: Option<String>,
 }
