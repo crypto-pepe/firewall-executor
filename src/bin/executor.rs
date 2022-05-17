@@ -1,10 +1,10 @@
 extern crate core;
 
-use std::{env, io};
+use std::io;
 
-use firewall_executor::ban_hammer::redis::RedisBanHammer;
 use pepe_log::info;
 
+use firewall_executor::ban_hammer::redis::RedisBanHammer;
 use firewall_executor::config;
 use firewall_executor::redis::get_pool;
 use firewall_executor::server::Server;
@@ -13,16 +13,7 @@ use firewall_executor::server::Server;
 async fn main() -> io::Result<()> {
     info!("start application");
 
-    let cfg = match env::var("CONFIG_PATH") {
-        Ok(cfg_path) => match config::Config::from_file(cfg_path.as_str()) {
-            Ok(a) => a,
-            Err(e) => panic!("can't read config from file {:?}", e),
-        },
-        Err(_) => match config::Config::load(config::DEFAULT_CONFIG) {
-            Ok(a) => a,
-            Err(e) => panic!("can't read default config {:?}", e),
-        },
-    };
+    let cfg = config::Config::load().expect("can't read config");
 
     info!("config loaded"; "config" => &cfg);
 

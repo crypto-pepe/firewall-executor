@@ -1,3 +1,4 @@
+use std::env;
 use std::fs::File;
 use std::io::Read;
 
@@ -17,8 +18,11 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn load(data: &str) -> Result<Self, ConfigError> {
-        pepe_config::load(data, config::FileFormat::Yaml)
+    pub fn load() -> Result<Self, ConfigError> {
+        match env::var("CONFIG_PATH") {
+            Ok(cfg_path) => Config::from_file(cfg_path.as_str()),
+            Err(_) => pepe_config::load(DEFAULT_CONFIG, config::FileFormat::Yaml),
+        }
     }
 
     pub fn from_file(filename: &str) -> Result<Self, ConfigError> {
