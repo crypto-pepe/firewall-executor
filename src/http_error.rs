@@ -42,7 +42,7 @@ impl ResponseError for BanTargetConversionError {
                 let mut details = BTreeMap::new();
                 details.insert(field_name.to_string(), "This field is required".to_string());
                 ErrorResponse {
-                    code: 100,
+                    code: 400,
                     reason: "Provided request does not match the constraints".into(),
                     details: Some(details),
                 }
