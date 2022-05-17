@@ -21,10 +21,6 @@ futures-util = "0.3.21"
 
 serde = { version = "1.0.137", features = ["derive"] }
 serde_json = "1.0.81"
-erased-serde = "0.3.20"
-
-slog = { version = "2.7.0", features = ["nested-values"] }
-slog-extlog-derive = "8.0.0"
 
 pepe-config = "0.0.2"
 
