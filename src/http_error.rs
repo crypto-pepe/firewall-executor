@@ -7,20 +7,21 @@ use serde::Serialize;
 struct ErrorResponse {
     code: u16,
     reason: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     details: Option<BTreeMap<String, String>>, // field name -> description,
 }
 
 #[derive(Debug, PartialEq)]
 pub enum BanTargetConversionError {
     FieldRequired(String),
-    InvalidTypeCount,
+    NotEnoughFields,
 }
 
 impl Display for BanTargetConversionError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             BanTargetConversionError::FieldRequired(field_name) => f.write_str(field_name),
-            BanTargetConversionError::InvalidTypeCount => f.write_str("invalid type count"),
+            BanTargetConversionError::NotEnoughFields => f.write_str(&*format!("at least on field required: 'ip', 'user-agent'"))
         }
     }
 }
@@ -47,7 +48,7 @@ impl ResponseError for BanTargetConversionError {
                     details: Some(details),
                 }
             }
-            BanTargetConversionError::InvalidTypeCount => ErrorResponse {
+            BanTargetConversionError::NotEnoughFields => ErrorResponse {
                 code: 400,
                 reason: self.to_string(),
                 details: None,

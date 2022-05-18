@@ -5,8 +5,8 @@ use std::io::Read;
 use config::ConfigError;
 use serde::{Deserialize, Serialize};
 
-use crate::server;
 use crate::{redis, telemetry};
+use crate::server;
 
 pub const DEFAULT_CONFIG: &str = include_str!("../config.yaml");
 
@@ -19,17 +19,6 @@ pub struct Config {
 
 impl Config {
     pub fn load() -> Result<Self, ConfigError> {
-        match env::var("CONFIG_PATH") {
-            Ok(cfg_path) => Config::from_file(cfg_path.as_str()),
-            Err(_) => pepe_config::load(DEFAULT_CONFIG, config::FileFormat::Yaml),
-        }
-    }
-
-    pub fn from_file(filename: &str) -> Result<Self, ConfigError> {
-        let mut file = File::open(filename).map_err(|e| ConfigError::Message(e.to_string()))?;
-        let mut data = String::new();
-        file.read_to_string(&mut data)
-            .map_err(|e| ConfigError::Message(e.to_string()))?;
-        pepe_config::load(&*data, config::FileFormat::Yaml)
+        pepe_config::load(DEFAULT_CONFIG, config::FileFormat::Yaml)
     }
 }
