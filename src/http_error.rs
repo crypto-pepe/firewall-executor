@@ -21,7 +21,9 @@ impl Display for BanTargetConversionError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             BanTargetConversionError::FieldRequired(field_name) => f.write_str(field_name),
-            BanTargetConversionError::NotEnoughFields => f.write_str(&*format!("at least on field required: 'ip', 'user-agent'"))
+            BanTargetConversionError::NotEnoughFields => {
+                f.write_str("at least on field required: 'ip', 'user-agent'")
+            }
         }
     }
 }
