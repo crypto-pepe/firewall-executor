@@ -11,64 +11,6 @@ use crate::errors;
 use crate::errors::BanError;
 use crate::model::{BanEntity, BanTarget, UnBanEntity};
 
-#[async_trait]
-impl BanHammer for RedisBanHammer {
-    #[tracing::instrument(skip(self))]
-    async fn ban(&self, be: BanEntity) -> Result<(), BanError> {
-        if self.dry {
-            return Ok(());
-        }
-        self.store(
-            be.target.clone(),
-            be.analyzer.clone(),
-            be.reason.clone(),
-            be.ttl,
-        )
-            .await
-            .map_err(errors::BanError::Error)
-    }
-
-    #[tracing::instrument(skip(self))]
-    async fn unban(&self, be: UnBanEntity) -> Result<(), BanError> {
-        if self.dry {
-            return Ok(());
-        }
-        match be {
-            UnBanEntity::Pattern(p) => {
-                if !p.eq("*") {
-                    return Err(BanError::NotFound(p));
-                }
-                self.del(
-                    BanTarget {
-                        ip: Some("*".to_string()),
-                        user_agent: None,
-                    }
-                        .to_string(),
-                )
-                    .await
-                    .map_err(errors::BanError::Error)?;
-                self.del(
-                    BanTarget {
-                        ip: None,
-                        user_agent: Some("*".to_string()),
-                    }
-                        .to_string(),
-                )
-                    .await
-                    .map_err(errors::BanError::Error)
-            }
-            UnBanEntity::Target(t) => self
-                .del(t.to_string())
-                .await
-                .map_err(errors::BanError::Error),
-        }
-    }
-
-    fn dry(&mut self, dry: bool) {
-        self.dry = dry
-    }
-}
-
 #[derive(Clone)]
 pub struct RedisBanHammer {
     pub dry: bool,
@@ -155,5 +97,63 @@ impl RedisBanHammer {
         tokio::time::timeout(self.timeout, self._del(pattern))
             .await
             .map_err(|_| errors::Redis::Timeout)?
+    }
+}
+
+#[async_trait]
+impl BanHammer for RedisBanHammer {
+    fn dry(&mut self, dry: bool) {
+        self.dry = dry
+    }
+
+    #[tracing::instrument(skip(self))]
+    async fn ban(&self, be: BanEntity) -> Result<(), BanError> {
+        if self.dry {
+            return Ok(());
+        }
+        self.store(
+            be.target.clone(),
+            be.analyzer.clone(),
+            be.reason.clone(),
+            be.ttl,
+        )
+            .await
+            .map_err(errors::BanError::Error)
+    }
+
+    #[tracing::instrument(skip(self))]
+    async fn unban(&self, be: UnBanEntity) -> Result<(), BanError> {
+        if self.dry {
+            return Ok(());
+        }
+        match be {
+            UnBanEntity::Pattern(p) => {
+                if !p.eq("*") {
+                    return Err(BanError::NotFound(p));
+                }
+                self.del(
+                    BanTarget {
+                        ip: Some("*".to_string()),
+                        user_agent: None,
+                    }
+                        .to_string(),
+                )
+                    .await
+                    .map_err(errors::BanError::Error)?;
+                self.del(
+                    BanTarget {
+                        ip: None,
+                        user_agent: Some("*".to_string()),
+                    }
+                        .to_string(),
+                )
+                    .await
+                    .map_err(errors::BanError::Error)
+            }
+            UnBanEntity::Target(t) => self
+                .del(t.to_string())
+                .await
+                .map_err(errors::BanError::Error),
+        }
     }
 }

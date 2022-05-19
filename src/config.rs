@@ -1,8 +1,9 @@
 use config::ConfigError;
+use config::FileFormat;
 use serde::{Deserialize, Serialize};
 
-use crate::server;
 use crate::{redis, telemetry};
+use crate::server;
 
 pub const DEFAULT_CONFIG: &str = include_str!("../config.yaml");
 
@@ -16,6 +17,6 @@ pub struct Config {
 
 impl Config {
     pub fn load() -> Result<Self, ConfigError> {
-        pepe_config::load(DEFAULT_CONFIG, config::FileFormat::Yaml)
+        pepe_config::load(DEFAULT_CONFIG, FileFormat::Yaml)
     }
 }
