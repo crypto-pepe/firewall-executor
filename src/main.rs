@@ -24,7 +24,10 @@ async fn main() -> io::Result<()> {
         Err(e) => panic!("create redis pool {:?}", e),
     };
 
-    let rbh = RedisBanHammer::new(redis_pool, cfg.redis.timeout_sec, cfg.dry_run.unwrap_or(false));
+    let rbh = RedisBanHammer::new(redis_pool,
+                                  cfg.redis.timeout_sec,
+                                  cfg.redis.namespace.clone(),
+                                  cfg.dry_run.unwrap_or(false));
     let srv = Server::new(&cfg.server, Box::new(rbh))?;
     srv.run().await
 }

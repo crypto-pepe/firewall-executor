@@ -9,19 +9,20 @@ use redis::AsyncCommands;
 use crate::ban_hammer::BanHammer;
 use crate::errors;
 use crate::errors::BanError;
-use crate::model::{BanEntity, BanTarget, UnBanEntity};
+use crate::model::{BanEntity, UnBanEntity};
 
 #[derive(Clone)]
 pub struct RedisBanHammer {
     pub dry: bool,
     pub pool: Pool<RedisConnectionManager>,
     pub timeout: time::Duration,
+    pub namespace: String,
 }
 
 impl RedisBanHammer {
-    pub fn new(pool: Pool<RedisConnectionManager>, timeout_secs: u64, dry: bool) -> Self {
+    pub fn new(pool: Pool<RedisConnectionManager>, timeout_secs: u64, namespace: String, dry: bool) -> Self {
         let timeout = time::Duration::from_secs(timeout_secs);
-        RedisBanHammer { pool, timeout, dry }
+        RedisBanHammer { pool, timeout, dry, namespace }
     }
 
     #[tracing::instrument(skip(self))]
@@ -32,7 +33,7 @@ impl RedisBanHammer {
         reason: String,
         ttl: u32,
     ) -> Result<(), errors::Redis> {
-        tokio::time::timeout(self.timeout, self._store(key, anl, reason, ttl))
+        tokio::time::timeout(self.timeout, self._store(format!("{}{}", self.namespace, key), anl, reason, ttl))
             .await
             .map_err(|_| errors::Redis::Timeout)?
     }
@@ -94,7 +95,7 @@ impl RedisBanHammer {
 
     #[tracing::instrument(skip(self))]
     pub async fn del(&self, pattern: String) -> Result<(), errors::Redis> {
-        tokio::time::timeout(self.timeout, self._del(pattern))
+        tokio::time::timeout(self.timeout, self._del(format!("{}{}", self.namespace, pattern)))
             .await
             .map_err(|_| errors::Redis::Timeout)?
     }
@@ -131,22 +132,7 @@ impl BanHammer for RedisBanHammer {
                 if !p.eq("*") {
                     return Err(BanError::NotFound(p));
                 }
-                self.del(
-                    BanTarget {
-                        ip: Some("*".to_string()),
-                        user_agent: None,
-                    }
-                        .to_string(),
-                )
-                    .await
-                    .map_err(errors::BanError::Error)?;
-                self.del(
-                    BanTarget {
-                        ip: None,
-                        user_agent: Some("*".to_string()),
-                    }
-                        .to_string(),
-                )
+                self.del(p)
                     .await
                     .map_err(errors::BanError::Error)
             }

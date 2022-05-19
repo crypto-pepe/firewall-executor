@@ -2,6 +2,7 @@ redis:
   host: '127.0.0.1'
   port: 6379
   timeout_sec: 2
+  namespace: "executor::"
 server:
   host: '127.0.0.1'
   port: 8000

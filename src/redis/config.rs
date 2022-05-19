@@ -7,6 +7,7 @@ pub struct Config {
     port: u16,
     client_id: Option<String>,
     password: Option<String>,
+    pub namespace: String,
     pub timeout_sec: u64,
 }
 
@@ -36,6 +37,7 @@ mod tests {
     #[test]
     fn connection_string_host_port() {
         let cfg = Config {
+            namespace: "".to_string(),
             host: "localhost".to_string(),
             port: 6379,
             client_id: None,
@@ -51,6 +53,7 @@ mod tests {
     #[test]
     fn connection_string_host_port_password() {
         let cfg = Config {
+            namespace: "".to_string(),
             host: "localhost".to_string(),
             port: 6379,
             client_id: None,
@@ -66,6 +69,7 @@ mod tests {
     #[test]
     fn connection_string_host_port_user_password() {
         let cfg = Config {
+            namespace: "".to_string(),
             host: "localhost".to_string(),
             port: 6379,
             client_id: Some("user".to_string()),
