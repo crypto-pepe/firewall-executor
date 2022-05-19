@@ -1,5 +1,4 @@
-use config::ConfigError;
-use config::FileFormat;
+use pepe_config::{ConfigError, FileFormat};
 use serde::{Deserialize, Serialize};
 
 use crate::{redis, telemetry};

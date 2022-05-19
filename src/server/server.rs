@@ -121,7 +121,7 @@ struct DryRunQuery {
 }
 
 #[tracing::instrument(skip(bh))]
-#[post("/api/dry")]
+#[post("/api/admin")]
 async fn use_dry_run(
     q: web::Query<DryRunQuery>,
     bh: Data<RwLock<Box<dyn BanHammer + Sync + Send>>>,
