@@ -1,18 +1,18 @@
 use std::sync::{Arc, RwLock};
 
-use actix_web::web::Data;
 use actix_web::{
-    delete, dev, error, http::StatusCode, post, web, App, HttpResponse, HttpServer, Responder,
+    App, delete, dev, error, http::StatusCode, HttpResponse, HttpServer, post, Responder, web,
 };
+use actix_web::web::Data;
 use mime;
 use serde::{Deserialize, Serialize};
 use tokio::io;
 use tracing_actix_web::TracingLogger;
 
-use crate::ban_hammer::DryWetBanHammerSwitcher;
+use crate::ANALYZER_HEADER;
+use crate::ban_hammer::{BanHammer};
 use crate::model::{BanEntity, BanRequest, UnBanRequest};
 use crate::server::Config;
-use crate::ANALYZER_HEADER;
 
 pub struct Server {
     srv: dev::Server,
@@ -21,7 +21,7 @@ pub struct Server {
 impl Server {
     pub fn new(
         cfg: &Config,
-        bh: Box<dyn DryWetBanHammerSwitcher + Sync + Send>,
+        bh: Box<dyn BanHammer + Sync + Send>,
     ) -> Result<Server, io::Error> {
         let bh = Data::from(Arc::new(RwLock::new(bh)));
 
@@ -60,7 +60,7 @@ fn server_config() -> Box<dyn Fn(&mut web::ServiceConfig)> {
 async fn process_ban(
     req: actix_web::HttpRequest,
     ban_req: web::Json<BanRequest>,
-    hammer: Data<RwLock<Box<dyn DryWetBanHammerSwitcher + Sync + Send>>>,
+    hammer: Data<RwLock<Box<dyn BanHammer + Sync + Send>>>,
 ) -> impl Responder {
     let anl = match req.headers().get(ANALYZER_HEADER) {
         None => return HttpResponse::build(StatusCode::BAD_REQUEST).finish(),
@@ -96,7 +96,7 @@ async fn process_ban(
 #[delete("/api/bans")]
 async fn process_unban(
     unban_req: web::Json<UnBanRequest>,
-    hammer: Data<RwLock<Box<dyn DryWetBanHammerSwitcher + Sync + Send>>>,
+    hammer: Data<RwLock<Box<dyn BanHammer + Sync + Send>>>,
 ) -> impl Responder {
     let hammer = match hammer.read() {
         Ok(h) => h,
@@ -120,24 +120,19 @@ struct DryRunQuery {
     dry: bool,
 }
 
-#[tracing::instrument(skip(switch))]
+#[tracing::instrument(skip(bh))]
 #[post("/api/dry")]
 async fn use_dry_run(
     q: web::Query<DryRunQuery>,
-    switch: Data<RwLock<Box<dyn DryWetBanHammerSwitcher + Sync + Send>>>,
+    bh: Data<RwLock<Box<dyn BanHammer + Sync + Send>>>,
 ) -> impl Responder {
-    let mut switch = match switch.write() {
+    let mut bh = match bh.write() {
         Ok(h) => h,
         Err(e) => {
             tracing::error!("ban hammer mutex {:?}", e);
             return HttpResponse::InternalServerError().finish();
         }
     };
-
-    if q.dry {
-        switch.dry()
-    } else {
-        switch.wet()
-    }
+    bh.dry(q.dry);
     HttpResponse::Ok().finish()
 }
