@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 tokio = { version = "1.18.1", features = ["rt", "macros", "rt-multi-thread", "tokio-macros"] }
 tokio-util = "0.7.1"
+futures = "0.3.21"
 
 actix-web = { version = "4.0.1" }
 mime = "0.3.16"

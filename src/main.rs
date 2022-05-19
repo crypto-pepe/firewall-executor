@@ -1,6 +1,8 @@
 use std::io;
 
+use firewall_executor::ban_hammer::dry::DryBanHammer;
 use firewall_executor::ban_hammer::redis::RedisBanHammer;
+use firewall_executor::ban_hammer::switcher::DryWetBanHammer;
 use firewall_executor::config;
 use firewall_executor::redis::get_pool;
 use firewall_executor::server::Server;
@@ -25,7 +27,8 @@ async fn main() -> io::Result<()> {
     };
 
     let rbh = RedisBanHammer::new(redis_pool, cfg.redis.timeout_sec);
-
-    let srv = Server::new(&cfg.server, rbh)?;
+    let dbh = DryBanHammer::default();
+    let switch = DryWetBanHammer::new(cfg.dry_run.unwrap_or(false), Box::new(dbh), Box::new(rbh));
+    let srv = Server::new(&cfg.server, Box::new(switch))?;
     srv.run().await
 }

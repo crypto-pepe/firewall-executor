@@ -1,15 +1,15 @@
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
 use actix_web::web::Data;
 use actix_web::{
     dev, error, http::StatusCode, post, web, App, HttpResponse, HttpServer, Responder,
 };
 use mime;
+use serde::{Deserialize, Serialize};
 use tokio::io;
 use tracing_actix_web::TracingLogger;
 
-use crate::ban_hammer::redis::RedisBanHammer;
-use crate::ban_hammer::BanHammer;
+use crate::ban_hammer::DryWetBanHammerSwitcher;
 use crate::model::{BanEntity, BanRequest};
 use crate::server::Config;
 use crate::ANALYZER_HEADER;
@@ -19,8 +19,11 @@ pub struct Server {
 }
 
 impl Server {
-    pub fn new(cfg: &Config, bh: RedisBanHammer) -> Result<Server, io::Error> {
-        let bh = Data::from(Arc::new(bh));
+    pub fn new(
+        cfg: &Config,
+        bh: Box<dyn DryWetBanHammerSwitcher + Sync + Send>,
+    ) -> Result<Server, io::Error> {
+        let bh = Data::from(Arc::new(RwLock::new(bh)));
 
         let srv = HttpServer::new(move || {
             App::new()
@@ -45,7 +48,9 @@ fn server_config() -> Box<dyn Fn(&mut web::ServiceConfig)> {
             .error_handler(|err, _| {
                 error::InternalError::from_response(err, HttpResponse::BadRequest().into()).into()
             });
-        cfg.app_data(json_cfg).service(process_ban);
+        cfg.app_data(json_cfg)
+            .service(process_ban)
+            .service(use_dry_run);
     })
 }
 
@@ -54,7 +59,7 @@ fn server_config() -> Box<dyn Fn(&mut web::ServiceConfig)> {
 async fn process_ban(
     req: actix_web::HttpRequest,
     ban_req: web::Json<BanRequest>,
-    hammer: Data<RedisBanHammer>,
+    hammer: Data<RwLock<Box<dyn DryWetBanHammerSwitcher + Sync + Send>>>,
 ) -> impl Responder {
     let anl = match req.headers().get(ANALYZER_HEADER) {
         None => return HttpResponse::build(StatusCode::BAD_REQUEST).finish(),
@@ -65,6 +70,13 @@ async fn process_ban(
                 return HttpResponse::build(StatusCode::BAD_REQUEST).finish();
             }
         },
+    };
+    let hammer = match hammer.read() {
+        Ok(h) => h,
+        Err(e) => {
+            tracing::error!("ban hammer mutex {:?}", e);
+            return HttpResponse::InternalServerError().finish();
+        }
     };
     let ban = match BanEntity::new(ban_req.0, anl.to_string()) {
         Ok(b) => b,
@@ -77,4 +89,31 @@ async fn process_ban(
             HttpResponse::InternalServerError().finish()
         }
     }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct DryRunQuery {
+    dry: bool,
+}
+
+#[tracing::instrument(skip(switch))]
+#[post("/api/dry")]
+async fn use_dry_run(
+    q: web::Query<DryRunQuery>,
+    switch: Data<RwLock<Box<dyn DryWetBanHammerSwitcher + Sync + Send>>>,
+) -> impl Responder {
+    let mut switch = match switch.write() {
+        Ok(h) => h,
+        Err(e) => {
+            tracing::error!("ban hammer mutex {:?}", e);
+            return HttpResponse::InternalServerError().finish();
+        }
+    };
+
+    if q.dry {
+        switch.dry()
+    } else {
+        switch.wet()
+    }
+    HttpResponse::Ok().finish()
 }
