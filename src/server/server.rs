@@ -2,7 +2,7 @@ use std::sync::{Arc, RwLock};
 
 use actix_web::web::Data;
 use actix_web::{
-    dev, error, http::StatusCode, post, web, App, HttpResponse, HttpServer, Responder,
+    delete, dev, error, http::StatusCode, post, web, App, HttpResponse, HttpServer, Responder,
 };
 use mime;
 use serde::{Deserialize, Serialize};
@@ -10,7 +10,7 @@ use tokio::io;
 use tracing_actix_web::TracingLogger;
 
 use crate::ban_hammer::DryWetBanHammerSwitcher;
-use crate::model::{BanEntity, BanRequest};
+use crate::model::{BanEntity, BanRequest, UnBanRequest};
 use crate::server::Config;
 use crate::ANALYZER_HEADER;
 
@@ -50,7 +50,8 @@ fn server_config() -> Box<dyn Fn(&mut web::ServiceConfig)> {
             });
         cfg.app_data(json_cfg)
             .service(process_ban)
-            .service(use_dry_run);
+            .service(use_dry_run)
+            .service(process_unban);
     })
 }
 
@@ -83,6 +84,29 @@ async fn process_ban(
         Err(fe) => return fe.into(),
     };
     match hammer.ban(ban).await {
+        Ok(()) => HttpResponse::NoContent().finish(),
+        Err(e) => {
+            tracing::error!("ban target: {:?}", e);
+            HttpResponse::InternalServerError().finish()
+        }
+    }
+}
+
+#[tracing::instrument(skip(hammer))]
+#[delete("/api/bans")]
+async fn process_unban(
+    unban_req: web::Json<UnBanRequest>,
+    hammer: Data<RwLock<Box<dyn DryWetBanHammerSwitcher + Sync + Send>>>,
+) -> impl Responder {
+    let hammer = match hammer.read() {
+        Ok(h) => h,
+        Err(e) => {
+            tracing::error!("ban hammer mutex {:?}", e);
+            return HttpResponse::InternalServerError().finish();
+        }
+    };
+
+    match hammer.unban(unban_req.0.target).await {
         Ok(()) => HttpResponse::NoContent().finish(),
         Err(e) => {
             tracing::error!("ban target: {:?}", e);

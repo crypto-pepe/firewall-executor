@@ -27,6 +27,7 @@ pepe-config = "0.0.2"
 
 config = "0.12.0"
 
+either = { version="1.6.1", features = ["serde"]}
 thiserror = "1.0.31"
 
 async-trait = "0.1.53"

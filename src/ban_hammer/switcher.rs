@@ -2,7 +2,7 @@ use async_trait::async_trait;
 
 use crate::ban_hammer::{BanHammer, DryWetBanHammerSwitcher, DryWetSwitcher};
 use crate::errors::BanError;
-use crate::model::BanEntity;
+use crate::model::{BanEntity, UnBanEntity};
 
 pub struct DryWetBanHammer {
     is_dry: bool,
@@ -36,6 +36,13 @@ impl BanHammer for DryWetBanHammer {
             return self.dry.ban(bt).await;
         }
         return self.wet.ban(bt).await;
+    }
+
+    async fn unban(&self, t: UnBanEntity) -> Result<(), BanError> {
+        if self.is_dry {
+            return self.dry.unban(t).await;
+        }
+        return self.wet.unban(t).await;
     }
 }
 

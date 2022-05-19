@@ -4,11 +4,12 @@ use std::time;
 use async_trait::async_trait;
 use bb8::Pool;
 use bb8_redis::RedisConnectionManager;
+use redis::AsyncCommands;
 
 use crate::ban_hammer::BanHammer;
 use crate::errors;
 use crate::errors::BanError;
-use crate::model::BanEntity;
+use crate::model::{BanEntity, BanTarget, UnBanEntity};
 
 #[async_trait]
 impl BanHammer for RedisBanHammer {
@@ -22,6 +23,39 @@ impl BanHammer for RedisBanHammer {
         )
         .await
         .map_err(errors::BanError::Error)
+    }
+
+    #[tracing::instrument(skip(self))]
+    async fn unban(&self, be: UnBanEntity) -> Result<(), BanError> {
+        match be {
+            UnBanEntity::Pattern(p) => {
+                if !p.eq("*") {
+                    return Err(BanError::NotFound(p));
+                }
+                self.del(
+                    BanTarget {
+                        ip: Some("*".to_string()),
+                        user_agent: None,
+                    }
+                    .to_string(),
+                )
+                .await
+                .map_err(errors::BanError::Error)?;
+                self.del(
+                    BanTarget {
+                        ip: None,
+                        user_agent: Some("*".to_string()),
+                    }
+                    .to_string(),
+                )
+                .await
+                .map_err(errors::BanError::Error)
+            }
+            UnBanEntity::Target(t) => self
+                .del(t.to_string())
+                .await
+                .map_err(errors::BanError::Error),
+        }
     }
 }
 
@@ -79,5 +113,36 @@ impl RedisBanHammer {
                 vec!["HSET".into(), "EXPIRE NX".into(), "EXPIRE GT".into()]))?;
 
         Ok(())
+    }
+
+    #[tracing::instrument(skip(self))]
+    async fn _del(&self, pattern: String) -> Result<(), errors::Redis> {
+        let pool = self.pool.clone();
+
+        let mut conn = match pool.get().await {
+            Ok(c) => c,
+            Err(e) => {
+                return Err(errors::Redis::GetConnection(Arc::new(e)));
+            }
+        };
+
+        let keys: Vec<String> = conn
+            .keys(pattern.clone())
+            .await
+            .map_err(|e| errors::Redis::GetKeys(Arc::new(e), pattern.clone()))?;
+        if !keys.is_empty() {
+            conn.del(keys.clone())
+                .await
+                .map_err(|e| errors::Redis::DeleteKeys(Arc::new(e), keys.clone()))?;
+        }
+
+        Ok(())
+    }
+
+    #[tracing::instrument(skip(self))]
+    pub async fn del(&self, pattern: String) -> Result<(), errors::Redis> {
+        tokio::time::timeout(self.timeout, self._del(pattern))
+            .await
+            .map_err(|_| errors::Redis::Timeout)?
     }
 }

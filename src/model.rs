@@ -88,6 +88,25 @@ impl Display for BanRequest {
     }
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct UnBanRequest {
+    pub target: UnBanEntity,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+#[serde(untagged)]
+pub enum UnBanEntity {
+    Target(BanTarget),
+    Pattern(String),
+}
+
+impl Display for UnBanEntity {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(serde_json::to_string(self).unwrap().as_str())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::model::BanTarget;

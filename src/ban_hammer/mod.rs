@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 
 use crate::errors;
-use crate::model::BanEntity;
+use crate::model::{BanEntity, UnBanEntity};
 
 pub mod dry;
 pub mod redis;
@@ -10,6 +10,7 @@ pub mod switcher;
 #[async_trait]
 pub trait BanHammer {
     async fn ban(&self, bt: BanEntity) -> Result<(), errors::BanError>;
+    async fn unban(&self, t: UnBanEntity) -> Result<(), errors::BanError>;
 }
 
 pub trait DryWetSwitcher {
