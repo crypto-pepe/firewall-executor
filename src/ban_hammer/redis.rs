@@ -128,6 +128,7 @@ impl BanHammer for RedisBanHammer {
     #[tracing::instrument(skip(self), fields(dry_run = % self.dry))]
     async fn ban(&self, be: BanEntity) -> Result<(), BanError> {
         if self.dry {
+            tracing::warn!("dry run");
             return Ok(());
         }
         self.store(
@@ -143,6 +144,7 @@ impl BanHammer for RedisBanHammer {
     #[tracing::instrument(skip(self), fields(dry_run = % self.dry))]
     async fn unban(&self, be: UnBanEntity) -> Result<(), BanError> {
         if self.dry {
+            tracing::warn!("dry run");
             return Ok(());
         }
         match be {
