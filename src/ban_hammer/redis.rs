@@ -106,7 +106,7 @@ impl BanHammer for RedisBanHammer {
         self.dry = dry
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(skip(self), fields(dry_run = % self.dry))]
     async fn ban(&self, be: BanEntity) -> Result<(), BanError> {
         if self.dry {
             return Ok(());
@@ -121,7 +121,7 @@ impl BanHammer for RedisBanHammer {
             .map_err(errors::BanError::Error)
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(skip(self), fields(dry_run = % self.dry))]
     async fn unban(&self, be: UnBanEntity) -> Result<(), BanError> {
         if self.dry {
             return Ok(());
