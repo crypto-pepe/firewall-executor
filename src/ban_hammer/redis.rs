@@ -6,7 +6,7 @@ use bb8::Pool;
 use bb8_redis::RedisConnectionManager;
 use redis::AsyncCommands;
 
-use crate::ban_hammer::BanHammer;
+use crate::ban_hammer::{BanHammer, BanHammerDryRunner, DryRunner};
 use crate::errors;
 use crate::errors::BanError;
 use crate::model::{BanEntity, UnBanEntity};
@@ -20,9 +20,19 @@ pub struct RedisBanHammer {
 }
 
 impl RedisBanHammer {
-    pub fn new(pool: Pool<RedisConnectionManager>, timeout_secs: u64, namespace: String, dry: bool) -> Self {
+    pub fn new(
+        pool: Pool<RedisConnectionManager>,
+        timeout_secs: u64,
+        namespace: String,
+        dry: bool,
+    ) -> Self {
         let timeout = time::Duration::from_secs(timeout_secs);
-        RedisBanHammer { pool, timeout, dry, namespace }
+        RedisBanHammer {
+            pool,
+            timeout,
+            dry,
+            namespace,
+        }
     }
 
     #[tracing::instrument(skip(self))]
@@ -33,9 +43,12 @@ impl RedisBanHammer {
         reason: String,
         ttl: u32,
     ) -> Result<(), errors::Redis> {
-        tokio::time::timeout(self.timeout, self._store(format!("{}{}", self.namespace, key), anl, reason, ttl))
-            .await
-            .map_err(|_| errors::Redis::Timeout)?
+        tokio::time::timeout(
+            self.timeout,
+            self._store(format!("{}{}", self.namespace, key), anl, reason, ttl),
+        )
+        .await
+        .map_err(|_| errors::Redis::Timeout)?
     }
 
     #[tracing::instrument(skip(self))]
@@ -95,18 +108,23 @@ impl RedisBanHammer {
 
     #[tracing::instrument(skip(self))]
     pub async fn del(&self, pattern: String) -> Result<(), errors::Redis> {
-        tokio::time::timeout(self.timeout, self._del(format!("{}{}", self.namespace, pattern)))
-            .await
-            .map_err(|_| errors::Redis::Timeout)?
+        tokio::time::timeout(
+            self.timeout,
+            self._del(format!("{}{}", self.namespace, pattern)),
+        )
+        .await
+        .map_err(|_| errors::Redis::Timeout)?
+    }
+}
+
+impl DryRunner for RedisBanHammer {
+    fn dry(&mut self, dry: bool) {
+        self.dry = dry
     }
 }
 
 #[async_trait]
 impl BanHammer for RedisBanHammer {
-    fn dry(&mut self, dry: bool) {
-        self.dry = dry
-    }
-
     #[tracing::instrument(skip(self), fields(dry_run = % self.dry))]
     async fn ban(&self, be: BanEntity) -> Result<(), BanError> {
         if self.dry {
@@ -118,8 +136,8 @@ impl BanHammer for RedisBanHammer {
             be.reason.clone(),
             be.ttl,
         )
-            .await
-            .map_err(errors::BanError::Error)
+        .await
+        .map_err(errors::BanError::Error)
     }
 
     #[tracing::instrument(skip(self), fields(dry_run = % self.dry))]
@@ -132,9 +150,7 @@ impl BanHammer for RedisBanHammer {
                 if !p.eq("*") {
                     return Err(BanError::NotFound(p));
                 }
-                self.del(p)
-                    .await
-                    .map_err(errors::BanError::Error)
+                self.del(p).await.map_err(errors::BanError::Error)
             }
             UnBanEntity::Target(t) => self
                 .del(t.to_string())
@@ -143,3 +159,5 @@ impl BanHammer for RedisBanHammer {
         }
     }
 }
+
+impl BanHammerDryRunner for RedisBanHammer {}

@@ -1,8 +1,8 @@
 use pepe_config::{ConfigError, FileFormat};
 use serde::{Deserialize, Serialize};
 
-use crate::{redis, telemetry};
 use crate::server;
+use crate::{redis, telemetry};
 
 pub const DEFAULT_CONFIG: &str = include_str!("../config.yaml");
 
