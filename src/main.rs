@@ -27,7 +27,7 @@ async fn main() -> io::Result<()> {
     let rbh = RedisBanHammer::new(
         redis_pool,
         cfg.redis_query_timeout_secs,
-        cfg.namespace.clone(),
+        cfg.redis_keys_prefix.clone(),
         cfg.dry_run.unwrap_or(false),
     );
     let srv = Server::new(&cfg.server, Box::new(rbh))?;

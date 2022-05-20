@@ -133,6 +133,6 @@ async fn use_dry_run(
             return HttpResponse::InternalServerError().finish();
         }
     };
-    bh.dry(q.dry_run);
+    bh.set_dry_run_mode(q.dry_run);
     HttpResponse::Ok().finish()
 }

@@ -118,7 +118,7 @@ impl RedisBanHammer {
 }
 
 impl DryRunner for RedisBanHammer {
-    fn dry(&mut self, dry: bool) {
+    fn set_dry_run_mode(&mut self, dry: bool) {
         self.dry = dry
     }
 }

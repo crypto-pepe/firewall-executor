@@ -2,7 +2,7 @@ redis:
   host: '127.0.0.1'
   port: 6379
 redis_query_timeout_secs: 2
-namespace: "banned::"
+redis_keys_prefix: "banned::"
 server:
   host: '127.0.0.1'
   port: 8001
