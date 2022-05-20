@@ -117,7 +117,7 @@ async fn process_unban(
 
 #[derive(Debug, Serialize, Deserialize)]
 struct DryRunQuery {
-    dry: bool,
+    dry_run: bool,
 }
 
 #[tracing::instrument(skip(bh))]
@@ -133,6 +133,6 @@ async fn use_dry_run(
             return HttpResponse::InternalServerError().finish();
         }
     };
-    bh.dry(q.dry);
+    bh.dry(q.dry_run);
     HttpResponse::Ok().finish()
 }

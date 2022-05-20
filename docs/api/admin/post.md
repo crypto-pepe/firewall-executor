@@ -10,9 +10,9 @@ Enables or disables dry run
 
 **Query**:
 
-| Field | Type   | Is required | Note               |
-|-------|--------|-------------|--------------------|
-| `dry` | 'bool` | Yes         | Enable dry run mod | 
+| Field     | Type   | Is required | Note               |
+|-----------|--------|-------------|--------------------|
+| `dry_run` | 'bool` | Yes         | Enable dry run mod | 
 
 ## Success Response
 
