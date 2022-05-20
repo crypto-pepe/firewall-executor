@@ -3,27 +3,38 @@ use tracing::subscriber::set_global_default;
 use tracing::Subscriber;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_log::LogTracer;
+use tracing_subscriber::fmt::Formatter;
 use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
-use tracing_subscriber::{EnvFilter, Registry};
+use tracing_subscriber::reload::Handle;
+use tracing_subscriber::EnvFilter;
 
 pub mod config;
+
 pub use self::config::Config;
 
-pub fn get_subscriber(cfg: &Config) -> Box<dyn Subscriber + Send + Sync> {
-    let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+pub fn get_subscriber(
+    cfg: &Config,
+) -> (
+    Box<dyn Subscriber + Send + Sync>,
+    Handle<EnvFilter, Formatter>,
+) {
     let formatting_layer = BunyanFormattingLayer::new(cfg.svc_name.to_string(), std::io::stdout);
-
-    let reg = Registry::default()
-        .with(env_filter)
-        .with(JsonStorageLayer)
-        .with(formatting_layer);
+    let sb = tracing_subscriber::fmt()
+        .with_env_filter("info")
+        .with_filter_reloading();
+    let h = sb.reload_handle();
+    let sb = sb.finish();
+    let reg = sb.with(JsonStorageLayer).with(formatting_layer);
 
     if cfg.jaeger_endpoint.is_some() {
         let ep = cfg.jaeger_endpoint.as_ref().unwrap();
         let tracer = init_tracer(cfg.svc_name.to_string(), ep.into());
-        Box::new(reg.with(tracing_opentelemetry::layer().with_tracer(tracer)))
+        (
+            Box::new(reg.with(tracing_opentelemetry::layer().with_tracer(tracer))),
+            h,
+        )
     } else {
-        Box::new(reg)
+        (Box::new(reg), h)
     }
 }
 

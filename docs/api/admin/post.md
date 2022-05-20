@@ -8,11 +8,29 @@ Enables or disables dry run
 
 ### Request constraints
 
-**Query**:
+**Content-Type**: `application/json`
 
-| Field     | Type   | Is required | Note               |
-|-----------|--------|-------------|--------------------|
-| `dry_run` | 'bool` | Yes         | Enable dry run mod | 
+**Body**:
+
+| Field       | Type     | Is required | Note               |
+|-------------|----------|-------------|--------------------|
+| `dry_run`   | 'bool`   | False       | Enable dry run mod | 
+| `log_level` | 'string` | False       | Sets log level     | 
+
+**Request examples**
+
+```json
+{
+  "dry_run": true
+}
+```
+
+```json
+{
+  "dry_run": false,
+  "log_level": "trace"
+}
+```
 
 ## Success Response
 

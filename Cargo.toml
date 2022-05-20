@@ -25,8 +25,9 @@ serde_json = "1.0.81"
 
 pepe-config = "0.0.3"
 
-either = { version="1.6.1", features = ["serde"]}
+either = { version = "1.6.1", features = ["serde"] }
 thiserror = "1.0.31"
+anyhow = "1.0.57"
 
 async-trait = "0.1.53"
 num-traits = "0.2.15"

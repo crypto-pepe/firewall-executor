@@ -1,13 +1,16 @@
-use std::sync::{Arc, RwLock};
-
 use actix_web::web::Data;
 use actix_web::{
     delete, dev, error, http::StatusCode, post, web, App, HttpResponse, HttpServer, Responder,
 };
 use mime;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
+use std::sync::{Arc, RwLock};
 use tokio::io;
 use tracing_actix_web::TracingLogger;
+use tracing_subscriber::fmt::Formatter;
+use tracing_subscriber::reload::Handle;
+use tracing_subscriber::EnvFilter;
 
 use crate::ban_hammer::BanHammerDryRunner;
 use crate::model::{BanEntity, BanRequest, UnBanRequest};
@@ -22,12 +25,15 @@ impl Server {
     pub fn new(
         cfg: &Config,
         bh: Box<dyn BanHammerDryRunner + Sync + Send>,
+        log_filter_handler: Handle<EnvFilter, Formatter>,
     ) -> Result<Server, io::Error> {
         let bh = Data::from(Arc::new(RwLock::new(bh)));
+        let lfh = Data::from(Arc::new(log_filter_handler));
 
         let srv = HttpServer::new(move || {
             App::new()
                 .app_data(bh.clone())
+                .app_data(lfh.clone())
                 .configure(server_config())
                 .wrap(TracingLogger::default())
         });
@@ -50,7 +56,7 @@ fn server_config() -> Box<dyn Fn(&mut web::ServiceConfig)> {
             });
         cfg.app_data(json_cfg)
             .service(process_ban)
-            .service(use_dry_run)
+            .service(admin_settings)
             .service(process_unban);
     })
 }
@@ -116,15 +122,17 @@ async fn process_unban(
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct DryRunQuery {
-    dry_run: bool,
+struct AdminRequest {
+    dry_run: Option<bool>,
+    log_level: Option<String>,
 }
 
 #[tracing::instrument(skip(bh))]
 #[post("/api/admin")]
-async fn use_dry_run(
-    q: web::Query<DryRunQuery>,
+async fn admin_settings(
+    q: web::Json<AdminRequest>,
     bh: Data<RwLock<Box<dyn BanHammerDryRunner + Sync + Send>>>,
+    h: Data<Handle<EnvFilter, Formatter>>,
 ) -> impl Responder {
     let mut bh = match bh.write() {
         Ok(h) => h,
@@ -133,6 +141,14 @@ async fn use_dry_run(
             return HttpResponse::InternalServerError().finish();
         }
     };
-    bh.set_dry_run_mode(q.dry_run);
+    if let Some(dry_run) = q.0.dry_run {
+        bh.set_dry_run_mode(dry_run);
+    }
+    if let Some(log_lvl) = q.0.log_level {
+        if let Err(e) = h.modify(|e| *e = EnvFilter::new(log_lvl)) {
+            return HttpResponse::BadRequest().json(json!({"error":e.to_string()}));
+        }
+    }
+
     HttpResponse::Ok().finish()
 }

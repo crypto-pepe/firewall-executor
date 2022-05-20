@@ -1,5 +1,5 @@
-use async_trait::async_trait;
 use crate::dry_runner::DryRunner;
+use async_trait::async_trait;
 
 use crate::errors;
 use crate::model::{BanEntity, UnBanEntity};

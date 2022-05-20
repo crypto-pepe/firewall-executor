@@ -18,7 +18,7 @@ pub struct Config {
 }
 
 fn default_redis_query_timeout_secs() -> u64 {
-    return 5;
+    5
 }
 
 impl Config {
