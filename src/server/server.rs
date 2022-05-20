@@ -5,8 +5,9 @@ use actix_web::{
 use mime;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc};
 use tokio::io;
+use tokio::sync::RwLock;
 use tracing_actix_web::TracingLogger;
 use tracing_subscriber::fmt::Formatter;
 use tracing_subscriber::reload::Handle;
@@ -78,13 +79,7 @@ async fn process_ban(
             }
         },
     };
-    let hammer = match hammer.read() {
-        Ok(h) => h,
-        Err(e) => {
-            tracing::error!("ban hammer mutex {:?}", e);
-            return HttpResponse::InternalServerError().finish();
-        }
-    };
+    let hammer = hammer.read().await;
     let ban = match BanEntity::new(ban_req.0, anl.to_string()) {
         Ok(b) => b,
         Err(fe) => return fe.into(),
@@ -104,14 +99,7 @@ async fn process_unban(
     unban_req: web::Json<UnBanRequest>,
     hammer: Data<RwLock<Box<dyn BanHammerDryRunner + Sync + Send>>>,
 ) -> impl Responder {
-    let hammer = match hammer.read() {
-        Ok(h) => h,
-        Err(e) => {
-            tracing::error!("ban hammer mutex {:?}", e);
-            return HttpResponse::InternalServerError().finish();
-        }
-    };
-
+    let hammer = hammer.read().await;
     match hammer.unban(unban_req.0.target).await {
         Ok(()) => HttpResponse::NoContent().finish(),
         Err(e) => {
@@ -124,7 +112,7 @@ async fn process_unban(
 #[derive(Debug, Serialize, Deserialize)]
 struct AdminRequest {
     dry_run: Option<bool>,
-    log_level: Option<String>,
+    log_directive: Option<String>,
 }
 
 #[tracing::instrument(skip(bh))]
@@ -134,17 +122,11 @@ async fn admin_settings(
     bh: Data<RwLock<Box<dyn BanHammerDryRunner + Sync + Send>>>,
     h: Data<Handle<EnvFilter, Formatter>>,
 ) -> impl Responder {
-    let mut bh = match bh.write() {
-        Ok(h) => h,
-        Err(e) => {
-            tracing::error!("ban hammer mutex {:?}", e);
-            return HttpResponse::InternalServerError().finish();
-        }
-    };
+    let mut bh = bh.write().await;
     if let Some(dry_run) = q.0.dry_run {
         bh.set_dry_run_mode(dry_run);
     }
-    if let Some(log_lvl) = q.0.log_level {
+    if let Some(log_lvl) = q.0.log_directive {
         if let Err(e) = h.modify(|e| *e = EnvFilter::new(log_lvl)) {
             return HttpResponse::BadRequest().json(json!({"error":e.to_string()}));
         }

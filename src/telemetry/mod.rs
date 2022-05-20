@@ -10,7 +10,7 @@ use tracing_subscriber::EnvFilter;
 
 pub mod config;
 
-pub use self::config::Config;
+pub use config::Config;
 
 pub fn get_subscriber(
     cfg: &Config,

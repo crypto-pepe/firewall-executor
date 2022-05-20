@@ -13,7 +13,7 @@ use crate::model::{BanEntity, UnBanEntity};
 
 #[derive(Clone)]
 pub struct RedisBanHammer {
-    pub dry: bool,
+    pub dry_run: bool,
     pub pool: Pool<RedisConnectionManager>,
     pub timeout: time::Duration,
     pub namespace: String,
@@ -24,13 +24,13 @@ impl RedisBanHammer {
         pool: Pool<RedisConnectionManager>,
         timeout_secs: u64,
         namespace: String,
-        dry: bool,
+        dry_run: bool,
     ) -> Self {
         let timeout = time::Duration::from_secs(timeout_secs);
         RedisBanHammer {
             pool,
             timeout,
-            dry,
+            dry_run,
             namespace,
         }
     }
@@ -47,8 +47,8 @@ impl RedisBanHammer {
             self.timeout,
             self._store(format!("{}{}", self.namespace, key), anl, reason, ttl),
         )
-        .await
-        .map_err(|_| errors::Redis::Timeout)?
+            .await
+            .map_err(|_| errors::Redis::Timeout)?
     }
 
     #[tracing::instrument(skip(self))]
@@ -112,22 +112,22 @@ impl RedisBanHammer {
             self.timeout,
             self._del(format!("{}{}", self.namespace, pattern)),
         )
-        .await
-        .map_err(|_| errors::Redis::Timeout)?
+            .await
+            .map_err(|_| errors::Redis::Timeout)?
     }
 }
 
 impl DryRunner for RedisBanHammer {
     fn set_dry_run_mode(&mut self, dry: bool) {
-        self.dry = dry
+        self.dry_run = dry
     }
 }
 
 #[async_trait]
 impl BanHammer for RedisBanHammer {
-    #[tracing::instrument(skip(self), fields(dry_run = % self.dry))]
+    #[tracing::instrument(skip(self), fields(dry_run = % self.dry_run))]
     async fn ban(&self, be: BanEntity) -> Result<(), BanError> {
-        if self.dry {
+        if self.dry_run {
             tracing::warn!("dry run");
             return Ok(());
         }
@@ -137,13 +137,13 @@ impl BanHammer for RedisBanHammer {
             be.reason.clone(),
             be.ttl,
         )
-        .await
-        .map_err(errors::BanError::Error)
+            .await
+            .map_err(errors::BanError::Error)
     }
 
-    #[tracing::instrument(skip(self), fields(dry_run = % self.dry))]
+    #[tracing::instrument(skip(self), fields(dry_run = % self.dry_run))]
     async fn unban(&self, be: UnBanEntity) -> Result<(), BanError> {
-        if self.dry {
+        if self.dry_run {
             tracing::warn!("dry run");
             return Ok(());
         }

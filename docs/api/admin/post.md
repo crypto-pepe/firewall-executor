@@ -12,10 +12,10 @@ Enables or disables dry run
 
 **Body**:
 
-| Field       | Type     | Is required | Note               |
-|-------------|----------|-------------|--------------------|
-| `dry_run`   | 'bool`   | False       | Enable dry run mod | 
-| `log_level` | 'string` | False       | Sets log level     | 
+| Field           | Type     | Is required | Note               |
+|-----------------|----------|-------------|--------------------|
+| `dry_run`       | 'bool`   | False       | Enable dry run mod | 
+| `log_directive` | 'string` | False       | Sets log directive | 
 
 **Request examples**
 
@@ -28,7 +28,7 @@ Enables or disables dry run
 ```json
 {
   "dry_run": false,
-  "log_level": "trace"
+  "log_directive": "error,firewall_executor=trace"
 }
 ```
 
