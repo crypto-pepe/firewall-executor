@@ -1,8 +1,10 @@
 redis:
   host: '127.0.0.1'
   port: 6379
-  timeout_sec: 2
-  namespace: "banned::"
+redis_query_timeout_secs: 2
+namespace: "banned::"
 server:
   host: '127.0.0.1'
-  port: 8000
+  port: 8001
+telemetry:
+  svc_name: "firewall-executor"
