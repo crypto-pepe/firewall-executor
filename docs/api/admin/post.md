@@ -2,7 +2,7 @@
 
 Enables or disables dry run
 
-**URL** : `/api/dry`
+**URL** : `/api/admin`
 
 **Method** : `POST`
 
