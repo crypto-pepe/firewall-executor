@@ -13,7 +13,12 @@ pub struct Config {
     pub server: server::Config,
     pub telemetry: telemetry::Config,
     pub namespace: String,
+    #[serde(default = "default_redis_query_timeout_secs")]
     pub redis_query_timeout_secs: u64,
+}
+
+fn default_redis_query_timeout_secs() -> u64 {
+    return 5;
 }
 
 impl Config {

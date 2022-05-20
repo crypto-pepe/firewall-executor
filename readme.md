@@ -20,7 +20,7 @@ api
 | redis.port                | Yes      | Redis service port                                                                       |
 | redis.client_id           | No       | Redis client id                                                                          |
 | redis.password            | No       | Redis password                                                                           |
-| redis_query_timeout_secs  | Yes      | Redis query timeout (seconds)                                                            |
+| redis_query_timeout_secs  | No       | Default: `5`. Redis query timeout (seconds)                                              |
 | namespace                 | True     | Prefix, that will be added to all keys to receive (must be same as in firewall-executor) |
 | server.host               | Yes      | Firewall-api service host                                                                |
 | server.port               | Yes      | Firewall-api service port                                                                |
