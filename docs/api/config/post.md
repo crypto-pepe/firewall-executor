@@ -1,6 +1,6 @@
-# Enable/disable dry run
+# Enable/disable dry run mode
 
-Enables or disables dry run
+Enables or disables dry run mode
 
 **URL** : `/api/config`
 
