@@ -7,8 +7,8 @@ use bb8_redis::RedisConnectionManager;
 use redis::AsyncCommands;
 
 use crate::ban_hammer::{BanHammer, BanHammerDryRunner, DryRunner};
-use crate::errors;
-use crate::errors::BanError;
+use crate::error;
+use crate::error::BanError;
 use crate::model::{BanEntity, UnBanEntity};
 
 #[derive(Clone)]
@@ -42,13 +42,13 @@ impl RedisBanHammer {
         anl: String,
         reason: String,
         ttl: u32,
-    ) -> Result<(), errors::Redis> {
+    ) -> Result<(), error::Redis> {
         tokio::time::timeout(
             self.timeout,
             self._store(format!("{}{}", self.namespace, key), anl, reason, ttl),
         )
         .await
-        .map_err(|_| errors::Redis::Timeout)?
+        .map_err(|_| error::Redis::Timeout)?
     }
 
     #[tracing::instrument(skip(self))]
@@ -58,13 +58,13 @@ impl RedisBanHammer {
         anl: String,
         reason: String,
         ttl: u32,
-    ) -> Result<(), errors::Redis> {
+    ) -> Result<(), error::Redis> {
         let pool = self.pool.clone();
 
         let mut conn = match pool.get().await {
             Ok(c) => c,
             Err(e) => {
-                return Err(errors::Redis::GetConnection(Arc::new(e)));
+                return Err(error::Redis::GetConnection(Arc::new(e)));
             }
         };
 
@@ -75,7 +75,7 @@ impl RedisBanHammer {
             .expire(&key, ttl as usize).arg("NX").ignore()
             .expire(&key, ttl as usize).arg("GT").ignore()
             .query_async(&mut *conn).await
-            .map_err(|re| errors::Redis::Pipeline(
+            .map_err(|re| error::Redis::Pipeline(
                 Arc::from(re),
                 vec!["HSET".into(), "EXPIRE NX".into(), "EXPIRE GT".into()]))?;
 
@@ -83,37 +83,37 @@ impl RedisBanHammer {
     }
 
     #[tracing::instrument(skip(self))]
-    async fn _del(&self, pattern: String) -> Result<(), errors::Redis> {
+    async fn _del(&self, pattern: String) -> Result<(), error::Redis> {
         let pool = self.pool.clone();
 
         let mut conn = match pool.get().await {
             Ok(c) => c,
             Err(e) => {
-                return Err(errors::Redis::GetConnection(Arc::new(e)));
+                return Err(error::Redis::GetConnection(Arc::new(e)));
             }
         };
 
         let keys: Vec<String> = conn
             .keys(pattern.clone())
             .await
-            .map_err(|e| errors::Redis::GetKeys(Arc::new(e), pattern.clone()))?;
+            .map_err(|e| error::Redis::GetKeys(Arc::new(e), pattern.clone()))?;
         if !keys.is_empty() {
             conn.del(keys.clone())
                 .await
-                .map_err(|e| errors::Redis::DeleteKeys(Arc::new(e), keys.clone()))?;
+                .map_err(|e| error::Redis::DeleteKeys(Arc::new(e), keys.clone()))?;
         }
 
         Ok(())
     }
 
     #[tracing::instrument(skip(self))]
-    pub async fn del(&self, pattern: String) -> Result<(), errors::Redis> {
+    pub async fn del(&self, pattern: String) -> Result<(), error::Redis> {
         tokio::time::timeout(
             self.timeout,
             self._del(format!("{}{}", self.namespace, pattern)),
         )
         .await
-        .map_err(|_| errors::Redis::Timeout)?
+        .map_err(|_| error::Redis::Timeout)?
     }
 }
 
@@ -138,7 +138,7 @@ impl BanHammer for RedisBanHammer {
             be.ttl,
         )
         .await
-        .map_err(errors::BanError::Error)
+        .map_err(error::BanError::Error)
     }
 
     #[tracing::instrument(skip(self), fields(dry_run = % self.dry_run))]
@@ -152,12 +152,12 @@ impl BanHammer for RedisBanHammer {
                 if !p.eq("*") {
                     return Err(BanError::NotFound(p));
                 }
-                self.del(p).await.map_err(errors::BanError::Error)
+                self.del(p).await.map_err(error::BanError::Error)
             }
             UnBanEntity::Target(t) => self
                 .del(t.to_string())
                 .await
-                .map_err(errors::BanError::Error),
+                .map_err(error::BanError::Error),
         }
     }
 }
