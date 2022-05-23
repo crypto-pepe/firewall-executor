@@ -12,23 +12,23 @@ Enables or disables dry run
 
 **Body**:
 
-| Field       | Type     | Is required | Note                |
-|-------------|----------|-------------|---------------------|
-| `dry_run`   | 'bool`   | False       | Enable dry run mode | 
-| `log_level` | 'string` | False       | Sets log level      | 
+| Field       | Type     | Is required | Note                        |
+|-------------|----------|-------------|-----------------------------|
+| `dry_run`   | 'bool`   | False       | Enable/disable dry run mode | 
+| `log_level` | 'string` | False       | Sets log level              | 
 
 **Request examples**
 
 ```json
 {
-  "dry_run": true
+    "dry_run": true
 }
 ```
 
 ```json
 {
-  "dry_run": false,
-  "log_level": "error,firewall_executor=trace"
+    "dry_run": false,
+    "log_level": "error,firewall_executor=trace"
 }
 ```
 

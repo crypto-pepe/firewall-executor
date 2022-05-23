@@ -14,10 +14,10 @@ Bans target with provided details.
 
 **Content-Type**: `application/json`
 
-| Field    | Type                                  | Is required | Note               |
-|----------|---------------------------------------|-------------|--------------------|
-| `target` | `{ ip: string?, user_agent:string? }` | Yes         | Ban target         | 
-| `reason` | `string`                              | Yes         | Ban reason         |
+| Field    | Type                                  | Is required | Note                |
+|----------|---------------------------------------|-------------|---------------------|
+| `target` | `{ ip: string?, user_agent:string? }` | Yes         | Ban target          | 
+| `reason` | `string`                              | Yes         | Ban reason          |
 | `ttl`    | `number`                              | Yes         | Ban TTL, in seconds |
 
 **Request examples**
