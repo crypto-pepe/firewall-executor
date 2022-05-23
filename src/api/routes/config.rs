@@ -15,7 +15,7 @@ pub struct ConfigRequest {
     log_level: Option<String>,
 }
 
-#[tracing::instrument(skip(bh))]
+#[tracing::instrument(skip(bh, h))]
 #[post("/api/config")]
 pub async fn configuration_handler(
     q: web::Json<ConfigRequest>,
