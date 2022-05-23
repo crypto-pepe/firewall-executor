@@ -1,7 +1,7 @@
+use firewall_executor::api::Server;
 use firewall_executor::ban_hammer::redis::RedisBanHammer;
 use firewall_executor::config;
 use firewall_executor::redis::get_pool;
-use firewall_executor::server::Server;
 use firewall_executor::telemetry;
 use std::io;
 

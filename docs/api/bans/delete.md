@@ -12,7 +12,7 @@ Unbans all targets or target with provided details.
 
 | Field    | Type                                              | Is required | Note                                              |
 |----------|---------------------------------------------------|-------------|---------------------------------------------------|
-| `target` | `{ ip: string?, user-agent:string? } \ enum("*")` | Yes         | Ban target. If target is "*" - unbans all targets |
+| `target` | `{ ip: string?, user_agent:string? } \ enum("*")` | Yes         | Ban target. If target is "*" - unbans all targets |
 
 **Request examples**
 
@@ -20,7 +20,7 @@ Unbans all targets or target with provided details.
 {
     "target": {
         "ip": "11.12.13.14",
-        "user-agent": "curl user-agent"
+        "user_agent": "curl user-agent"
     }
 }
 ```

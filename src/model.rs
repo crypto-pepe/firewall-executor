@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::http_error::BanTargetConversionError;
 
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
+#[serde(rename_all = "snake_case")]
 pub struct BanTarget {
     pub ip: Option<String>,
     pub user_agent: Option<String>,
@@ -25,7 +25,7 @@ impl Display for BanTarget {
         }
         if self.user_agent.is_some() {
             vv.push(format!(
-                "user-agent:{}",
+                "user_agent:{}",
                 &*self.user_agent.as_ref().unwrap()
             ));
         }
@@ -136,7 +136,7 @@ mod tests {
                 ip: None,
                 user_agent: Some("abc".into()),
             },
-            want: "user-agent:abc".into(),
+            want: "user_agent:abc".into(),
         };
 
         assert_eq!(tc.input.to_string(), tc.want);
@@ -149,7 +149,7 @@ mod tests {
                 ip: Some("1.1.1.1".into()),
                 user_agent: Some("abc".into()),
             },
-            want: "ip:1.1.1.1__user-agent:abc".into(),
+            want: "ip:1.1.1.1__user_agent:abc".into(),
         };
 
         assert_eq!(tc.input.to_string(), tc.want);
