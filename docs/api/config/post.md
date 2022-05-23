@@ -1,6 +1,7 @@
-# Enable/disable dry run mode
+# Configure application
 
-Enables or disables dry run mode
+- Enable or disable dry run mode
+- Change log level
 
 **URL** : `/api/config`
 
