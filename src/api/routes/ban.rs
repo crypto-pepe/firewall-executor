@@ -1,11 +1,28 @@
-use crate::api::ANALYZER_HEADER;
+use std::fmt::{Display, Formatter};
+
 use actix_web::web::Data;
 use actix_web::{post, web, HttpResponse, Responder, ResponseError};
+use serde::{Deserialize, Serialize};
 use tokio::sync::RwLock;
 
 use crate::api::http_error::ErrorResponse;
+use crate::api::ANALYZER_HEADER;
 use crate::ban_hammer::BanHammerDryRunner;
-use crate::model::{BanEntity, BanRequest};
+use crate::model::{BanEntity, BanTarget};
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub struct BanRequest {
+    pub target: Option<BanTarget>,
+    pub reason: Option<String>,
+    pub ttl: Option<u32>,
+}
+
+impl Display for BanRequest {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(serde_json::to_string(self).unwrap().as_str())
+    }
+}
 
 #[tracing::instrument(skip(req, hammer))]
 #[post("/api/bans")]
@@ -20,7 +37,7 @@ pub async fn process_ban(
                 code: 400,
                 reason: format!("{} header required", ANALYZER_HEADER),
                 details: None,
-            })
+            });
         }
         Some(s) => match s.to_str() {
             Ok(s) => s,

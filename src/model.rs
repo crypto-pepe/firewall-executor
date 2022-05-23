@@ -2,6 +2,8 @@ use std::fmt::{Debug, Display, Error, Formatter};
 
 use serde::{Deserialize, Serialize};
 
+use crate::api::routes::BanRequest;
+
 #[derive(Debug, PartialEq)]
 pub enum BanTargetConversionError {
     FieldRequired(String),
@@ -87,25 +89,6 @@ impl BanEntity {
             reason,
         })
     }
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "snake_case")]
-pub struct BanRequest {
-    pub target: Option<BanTarget>,
-    pub reason: Option<String>,
-    pub ttl: Option<u32>,
-}
-
-impl Display for BanRequest {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(serde_json::to_string(self).unwrap().as_str())
-    }
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct UnBanRequest {
-    pub target: UnBanEntity,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

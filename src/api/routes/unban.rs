@@ -1,10 +1,16 @@
 use actix_web::web::Data;
 use actix_web::{delete, web, HttpResponse, Responder, ResponseError};
+use serde::{Deserialize, Serialize};
 use tokio::sync::RwLock;
 
 use crate::api::http_error;
 use crate::ban_hammer::BanHammerDryRunner;
-use crate::model::UnBanRequest;
+use crate::model::UnBanEntity;
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct UnBanRequest {
+    pub target: UnBanEntity,
+}
 
 #[tracing::instrument(skip(hammer))]
 #[delete("/api/bans")]
