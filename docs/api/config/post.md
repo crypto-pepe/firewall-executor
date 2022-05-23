@@ -41,6 +41,13 @@
 
 ## Error Responses
 
-**Condition** : request is incorrect.
+**Condition** : Request is incorrect.
 
 **Code** : `400 BAD REQUEST`
+
+```json
+{
+    "code": 400,
+    "reason": "Log level is incorrect"
+}
+```
