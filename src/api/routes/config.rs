@@ -10,7 +10,7 @@ use crate::api::http_error::ErrorResponse;
 use crate::ban_hammer::BanHammerDryRunner;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ConfigureRequest {
+pub struct ConfigRequest {
     dry_run: Option<bool>,
     log_level: Option<String>,
 }
@@ -18,7 +18,7 @@ pub struct ConfigureRequest {
 #[tracing::instrument(skip(bh))]
 #[post("/api/config")]
 pub async fn configuration_handler(
-    q: web::Json<ConfigureRequest>,
+    q: web::Json<ConfigRequest>,
     bh: Data<RwLock<Box<dyn BanHammerDryRunner + Sync + Send>>>,
     h: Data<Handle<EnvFilter, Formatter>>,
 ) -> Result<impl Responder, impl ResponseError> {
