@@ -12,10 +12,10 @@ Enables or disables dry run
 
 **Body**:
 
-| Field           | Type     | Is required | Note               |
-|-----------------|----------|-------------|--------------------|
-| `dry_run`       | 'bool`   | False       | Enable dry run mod | 
-| `log_directive` | 'string` | False       | Sets log directive | 
+| Field       | Type     | Is required | Note                |
+|-------------|----------|-------------|---------------------|
+| `dry_run`   | 'bool`   | False       | Enable dry run mode | 
+| `log_level` | 'string` | False       | Sets log level      | 
 
 **Request examples**
 
@@ -28,18 +28,18 @@ Enables or disables dry run
 ```json
 {
   "dry_run": false,
-  "log_directive": "error,firewall_executor=trace"
+  "log_level": "error,firewall_executor=trace"
 }
 ```
 
 ## Success Response
 
-**Condition** : Dry run mod was successfully enabled/disabled.
+**Condition** : Dry run mode was enabled/disabled.
 
 **Code** : `200 OK`
 
 ## Error Responses
 
-**Condition** : query is incorrect.
+**Condition** : request is incorrect.
 
 **Code** : `400 BAD REQUEST`

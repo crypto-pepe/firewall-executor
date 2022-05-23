@@ -526,6 +526,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "56899898ce76aaf4a0f24d914c97ea6ed976d42fec6ad33fcbb0a1103e07b2b0"
 
 [[package]]
+name = "duration-string"
+version = "0.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b65bd8fceb01387287b3502b845588b9bf60e50e0d27392f724e6669385d6ac7"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "encoding_rs"
 version = "0.8.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1113,11 +1122,12 @@ checksum = "8835116a5c179084a830efb3adc117ab007512b535bc1a21c991d3b32a6b44dd"
 
 [[package]]
 name = "pepe-config"
-version = "0.0.3"
+version = "0.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f52dd99337856e82a90cc4acccedce82dcf0f4dc7896403274c5c415ee00d90a"
+checksum = "9619107255c4122746535b197d6bfb741988a2fd5d337cd6e9e9c87db115f364"
 dependencies = [
  "config",
+ "duration-string",
  "serde",
 ]
 

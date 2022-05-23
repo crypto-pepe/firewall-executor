@@ -47,8 +47,8 @@ impl RedisBanHammer {
             self.timeout,
             self._store(format!("{}{}", self.namespace, key), anl, reason, ttl),
         )
-            .await
-            .map_err(|_| errors::Redis::Timeout)?
+        .await
+        .map_err(|_| errors::Redis::Timeout)?
     }
 
     #[tracing::instrument(skip(self))]
@@ -112,14 +112,14 @@ impl RedisBanHammer {
             self.timeout,
             self._del(format!("{}{}", self.namespace, pattern)),
         )
-            .await
-            .map_err(|_| errors::Redis::Timeout)?
+        .await
+        .map_err(|_| errors::Redis::Timeout)?
     }
 }
 
 impl DryRunner for RedisBanHammer {
-    fn set_dry_run_mode(&mut self, dry: bool) {
-        self.dry_run = dry
+    fn set_dry_run_mode(&mut self, mode: bool) {
+        self.dry_run = mode
     }
 }
 
@@ -137,8 +137,8 @@ impl BanHammer for RedisBanHammer {
             be.reason.clone(),
             be.ttl,
         )
-            .await
-            .map_err(errors::BanError::Error)
+        .await
+        .map_err(errors::BanError::Error)
     }
 
     #[tracing::instrument(skip(self), fields(dry_run = % self.dry_run))]

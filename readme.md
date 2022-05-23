@@ -26,7 +26,7 @@ api
 | server.port               | Yes      | Firewall-api service port                                                                |
 | telemetry.svc_name        | Yes      | Service name for tracing                                                                 |
 | telemetry.jaeger_endpoint | No       | Jaeger endpoint                                                                          |
-| dry run                   | No       | Default: `false`. Run firewall-executor in dry run mod                                   |
+| dry run                   | No       | Default: `false`. Run firewall-executor in dry run mode                                  |
 
 ___
 

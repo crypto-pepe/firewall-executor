@@ -5,7 +5,7 @@ use actix_web::{
 use mime;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use std::sync::{Arc};
+use std::sync::Arc;
 use tokio::io;
 use tokio::sync::RwLock;
 use tracing_actix_web::TracingLogger;
@@ -112,7 +112,7 @@ async fn process_unban(
 #[derive(Debug, Serialize, Deserialize)]
 struct AdminRequest {
     dry_run: Option<bool>,
-    log_directive: Option<String>,
+    log_level: Option<String>,
 }
 
 #[tracing::instrument(skip(bh))]
@@ -126,7 +126,7 @@ async fn admin_settings(
     if let Some(dry_run) = q.0.dry_run {
         bh.set_dry_run_mode(dry_run);
     }
-    if let Some(log_lvl) = q.0.log_directive {
+    if let Some(log_lvl) = q.0.log_level {
         if let Err(e) = h.modify(|e| *e = EnvFilter::new(log_lvl)) {
             return HttpResponse::BadRequest().json(json!({"error":e.to_string()}));
         }
