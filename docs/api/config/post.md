@@ -35,9 +35,9 @@
 
 ## Success Response
 
-**Condition** : Dry run mode was enabled/disabled.
+**Condition** : Successfully updated service configuration
 
-**Code** : `200 OK`
+**Code** : `204 NO CONTENT`
 
 ## Error Responses
 

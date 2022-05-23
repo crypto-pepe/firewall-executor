@@ -32,5 +32,5 @@ pub async fn admin_settings(
         }
     }
 
-    Ok(HttpResponse::Ok().finish())
+    Ok(HttpResponse::NoContent().finish())
 }
