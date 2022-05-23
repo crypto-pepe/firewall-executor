@@ -1,12 +1,12 @@
 use opentelemetry::sdk::trace::Tracer;
-use tracing::Subscriber;
 use tracing::subscriber::set_global_default;
+use tracing::Subscriber;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_log::LogTracer;
-use tracing_subscriber::EnvFilter;
 use tracing_subscriber::fmt::Formatter;
 use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
 use tracing_subscriber::reload::Handle;
+use tracing_subscriber::EnvFilter;
 
 pub use config::Config;
 
@@ -20,7 +20,9 @@ pub fn get_subscriber(
 ) {
     let formatting_layer = BunyanFormattingLayer::new(cfg.svc_name.to_string(), std::io::stdout);
     let sb = tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")))
+        .with_env_filter(
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
+        )
         .with_filter_reloading();
     let h = sb.reload_handle();
     let sb = sb.finish();

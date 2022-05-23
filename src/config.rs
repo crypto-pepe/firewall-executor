@@ -2,14 +2,14 @@ use pepe_config::{ConfigError, FileFormat};
 use serde::{Deserialize, Serialize};
 
 use crate::server;
-use crate::{redis, telemetry};
+use crate::telemetry;
 
 pub const DEFAULT_CONFIG: &str = include_str!("../config.yaml");
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Config {
     pub dry_run: Option<bool>,
-    pub redis: redis::Config,
+    pub redis: pepe_config::redis::Config,
     pub server: server::Config,
     pub telemetry: telemetry::Config,
     pub redis_keys_prefix: String,
