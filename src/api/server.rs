@@ -51,7 +51,7 @@ fn server_config() -> Box<dyn Fn(&mut web::ServiceConfig)> {
             });
         cfg.app_data(json_cfg)
             .service(routes::process_ban)
-            .service(routes::admin_settings)
+            .service(routes::configuration_handler)
             .service(routes::process_unban);
     })
 }
