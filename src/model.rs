@@ -15,21 +15,21 @@ const SEPARATOR: &str = "__";
 
 impl Display for BanTarget {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut vv: Vec<String> = Vec::new();
+        let mut ss = vec![];
 
         if self.user_agent.is_none() && self.ip.is_none() {
             return Err(Error);
         }
-        if self.ip.is_some() {
-            vv.push(format!("ip:{}", &*self.ip.as_ref().unwrap()));
+
+        if let Some(ip) = &self.ip {
+            ss.push(format!("ip:{}", ip));
         }
-        if self.user_agent.is_some() {
-            vv.push(format!(
-                "user_agent:{}",
-                &*self.user_agent.as_ref().unwrap()
-            ));
+
+        if let Some(user_agent) = &self.user_agent {
+            ss.push(format!("user_agent:{}", user_agent));
         }
-        f.write_str(&*vv.join(SEPARATOR))
+
+        f.write_str(&ss.join(SEPARATOR))
     }
 }
 
