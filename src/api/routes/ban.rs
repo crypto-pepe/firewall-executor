@@ -3,8 +3,8 @@ use actix_web::web::Data;
 use actix_web::{post, web, HttpResponse, Responder, ResponseError};
 use tokio::sync::RwLock;
 
+use crate::api::http_error::ErrorResponse;
 use crate::ban_hammer::BanHammerDryRunner;
-use crate::http_error::ErrorResponse;
 use crate::model::{BanEntity, BanRequest};
 
 #[tracing::instrument(skip(req, hammer))]

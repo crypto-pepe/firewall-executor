@@ -2,7 +2,22 @@ use std::fmt::{Debug, Display, Error, Formatter};
 
 use serde::{Deserialize, Serialize};
 
-use crate::http_error::BanTargetConversionError;
+#[derive(Debug, PartialEq)]
+pub enum BanTargetConversionError {
+    FieldRequired(String),
+    NotEnoughFields,
+}
+
+impl Display for BanTargetConversionError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            BanTargetConversionError::FieldRequired(field_name) => f.write_str(field_name),
+            BanTargetConversionError::NotEnoughFields => {
+                f.write_str("at least on field required: 'ip', 'user_agent'")
+            }
+        }
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

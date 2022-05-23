@@ -1,8 +1,9 @@
-use std::{collections::BTreeMap, fmt::Display};
 use std::fmt::{Debug, Formatter};
+use std::{collections::BTreeMap, fmt::Display};
 
-use actix_web::{error::ResponseError, http::StatusCode, HttpResponse};
+use crate::model::BanTargetConversionError;
 use actix_web::body::BoxBody;
+use actix_web::{error::ResponseError, http::StatusCode, HttpResponse};
 use serde::Serialize;
 
 #[derive(Debug, Serialize)]
@@ -11,23 +12,6 @@ pub struct ErrorResponse {
     pub(crate) reason: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub details: Option<BTreeMap<String, String>>, // field name -> description,
-}
-
-#[derive(Debug, PartialEq)]
-pub enum BanTargetConversionError {
-    FieldRequired(String),
-    NotEnoughFields,
-}
-
-impl Display for BanTargetConversionError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            BanTargetConversionError::FieldRequired(field_name) => f.write_str(field_name),
-            BanTargetConversionError::NotEnoughFields => {
-                f.write_str("at least on field required: 'ip', 'user_agent'")
-            }
-        }
-    }
 }
 
 impl From<BanTargetConversionError> for ErrorResponse {

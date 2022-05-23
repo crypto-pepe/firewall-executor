@@ -2,8 +2,8 @@ use actix_web::web::Data;
 use actix_web::{delete, web, HttpResponse, Responder, ResponseError};
 use tokio::sync::RwLock;
 
+use crate::api::http_error;
 use crate::ban_hammer::BanHammerDryRunner;
-use crate::http_error;
 use crate::model::UnBanRequest;
 
 #[tracing::instrument(skip(hammer))]
