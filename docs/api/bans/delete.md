@@ -11,8 +11,8 @@ Unbans all targets or target with provided details.
 **Content-Type**: `application/json`
 
 | Field    | Type                                        | Is required | Note                                              |
-|----------|---------------------------------------------|-------------|---------------------------------------------------|
-| `target` | `{ ip: string?, user_agent:string? } \ '*'` | Yes         | Ban target. If target is "*" - unbans all targets |
+|----------|---------------------------------------------|------------|---------------------------------------------------|
+| `target` | `{ ip: string?, user_agent:string? } \| '*'`       | Yes         | Ban target. If target is "*" - unbans all targets |
 
 **Request examples**
 
