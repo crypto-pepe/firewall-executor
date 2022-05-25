@@ -24,4 +24,4 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ${{ secrets.DOCKER_USER }}/firewall-executor:latest, ${{ secrets.DOCKER_USER }}/firewall-executor:${{ github.ref_name }}
+        tags: ${{ secrets.DOCKER_USER }}/firewall-executor:latest, ${{ secrets.DOCKER_USER }}/firewall-executor:${GITHUB_REF##*/}
