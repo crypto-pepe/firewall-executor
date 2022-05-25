@@ -2,8 +2,6 @@ name: Docker Image CI
 
 on:
   pull_request:
-    branches:
-      - 'release/**'
 
 jobs:
   build:
@@ -26,4 +24,4 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ${{ secrets.DOCKER_USER }}/firewall-executor:latest
+        tags: ${{ secrets.DOCKER_USER }}/firewall-executor:latest, ${{ secrets.DOCKER_USER }}/firewall-executor:${{ github.ref_name }}
