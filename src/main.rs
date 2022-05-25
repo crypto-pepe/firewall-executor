@@ -1,8 +1,15 @@
-use firewall_executor::api::Server;
-use firewall_executor::ban_hammer::redis::RedisBanHammer;
-use firewall_executor::config;
-use firewall_executor::redis::get_pool;
-use firewall_executor::telemetry;
+mod api;
+mod ban_hammer;
+mod config;
+mod dry_runner;
+mod error;
+mod model;
+mod redis;
+mod telemetry;
+
+use crate::redis::get_pool;
+use api::Server;
+use ban_hammer::redis::RedisBanHammer;
 use std::io;
 
 #[tokio::main]
