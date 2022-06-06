@@ -1,6 +1,7 @@
 use std::fmt::{Debug, Formatter};
 use std::{collections::BTreeMap, fmt::Display};
 
+use crate::error::BanError;
 use crate::model::BanTargetConversionError;
 use actix_web::body::BoxBody;
 use actix_web::{error::ResponseError, http::StatusCode, HttpResponse};
@@ -48,5 +49,41 @@ impl ResponseError for ErrorResponse {
 
     fn error_response(&self) -> HttpResponse<BoxBody> {
         HttpResponse::build(self.status_code()).json(self)
+    }
+}
+
+pub enum HeaderError {
+    HeaderRequired(String),
+    HeaderIsEmpty(String),
+    HeaderIsNotString(String),
+}
+
+impl From<HeaderError> for ErrorResponse {
+    fn from(e: HeaderError) -> Self {
+        ErrorResponse {
+            code: 400,
+            reason: match e {
+                HeaderError::HeaderRequired(s) => format!("header {} is required", s),
+                HeaderError::HeaderIsEmpty(s) => format!("header {} is empty", s),
+                HeaderError::HeaderIsNotString(s) => format!("header {} is not string", s),
+            },
+            details: None,
+        }
+    }
+}
+impl From<BanError> for ErrorResponse {
+    fn from(e: BanError) -> Self {
+        match e {
+            BanError::Error(e) => ErrorResponse {
+                code: 500,
+                reason: e.to_string(),
+                details: None,
+            },
+            BanError::NotFound(t) => ErrorResponse {
+                code: 404,
+                reason: format!("target {} not found", t),
+                details: None,
+            },
+        }
     }
 }

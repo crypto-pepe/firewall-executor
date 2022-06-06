@@ -1,11 +1,11 @@
 use std::fmt::{Display, Formatter};
 
 use actix_web::web::Data;
-use actix_web::{post, web, HttpResponse, Responder, ResponseError};
+use actix_web::{post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use tokio::sync::RwLock;
 
-use crate::api::http_error::ErrorResponse;
+use crate::api::http_error::{ErrorResponse, HeaderError};
 use crate::api::ANALYZER_HEADER;
 use crate::ban_hammer::BanHammerDryRunner;
 use crate::model::{BanEntity, BanTarget};
@@ -35,33 +35,21 @@ pub async fn process_ban(
     req: actix_web::HttpRequest,
     ban_req: web::Json<BanRequest>,
     hammer: Data<RwLock<Box<dyn BanHammerDryRunner + Sync + Send>>>,
-) -> Result<impl Responder, impl ResponseError> {
+) -> Result<impl Responder, ErrorResponse> {
     let anl = match req.headers().get(ANALYZER_HEADER) {
         None => {
-            return Err(ErrorResponse {
-                code: 400,
-                reason: format!("{} header required", ANALYZER_HEADER),
-                details: None,
-            });
+            return Err(HeaderError::HeaderRequired(ANALYZER_HEADER.to_string()).into());
         }
         Some(s) => match s.to_str() {
             Ok(s) => match s {
                 "" => {
-                    return Err(ErrorResponse {
-                        code: 400,
-                        reason: format!("{} header required", ANALYZER_HEADER),
-                        details: None,
-                    });
+                    return Err(HeaderError::HeaderIsEmpty(ANALYZER_HEADER.to_string()).into());
                 }
                 _ => s,
             },
             Err(e) => {
                 tracing::error!("convert analyzer header: {:?}", e);
-                return Err(ErrorResponse {
-                    code: 400,
-                    reason: format!("can't convert {} header to string", ANALYZER_HEADER),
-                    details: None,
-                });
+                return Err(HeaderError::HeaderIsNotString(ANALYZER_HEADER.to_string()).into());
             }
         },
     };
@@ -74,11 +62,7 @@ pub async fn process_ban(
         Ok(()) => Ok(HttpResponse::NoContent().finish()),
         Err(e) => {
             tracing::error!("ban target: {:?}", e);
-            Err(ErrorResponse {
-                code: 500,
-                reason: e.to_string(),
-                details: None,
-            })
+            Err(e.into())
         }
     }
 }
