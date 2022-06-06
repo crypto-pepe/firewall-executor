@@ -1,5 +1,5 @@
 use actix_web::web::Data;
-use actix_web::{dev, error, web, App, HttpResponse, HttpServer, ResponseError};
+use actix_web::{dev, error, web, App, HttpServer, ResponseError};
 use mime;
 use std::sync::Arc;
 use tokio::io;
@@ -9,8 +9,8 @@ use tracing_subscriber::fmt::Formatter;
 use tracing_subscriber::reload::Handle;
 use tracing_subscriber::EnvFilter;
 
-use crate::api::{routes, Config};
 use crate::api::http_error::ErrorResponse;
+use crate::api::{routes, Config};
 use crate::ban_hammer::BanHammerDryRunner;
 
 pub struct Server {
@@ -49,11 +49,16 @@ fn server_config() -> Box<dyn Fn(&mut web::ServiceConfig)> {
             .content_type(|mime| mime == mime::APPLICATION_JSON)
             .error_handler(|err, _| {
                 let reason = err.to_string();
-                error::InternalError::from_response(err, ErrorResponse{
-                    code: 400,
-                    reason,
-                    details: None
-                }.error_response()).into()
+                error::InternalError::from_response(
+                    err,
+                    ErrorResponse {
+                        code: 400,
+                        reason,
+                        details: None,
+                    }
+                    .error_response(),
+                )
+                .into()
             });
         cfg.app_data(json_cfg)
             .service(routes::process_ban)
