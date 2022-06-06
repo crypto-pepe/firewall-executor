@@ -41,12 +41,12 @@ pub async fn process_ban(
             return Err(HeaderError::HeaderRequired(ANALYZER_HEADER.to_string()).into());
         }
         Some(s) => match s.to_str() {
-            Ok(s) => match s {
-                "" => {
+            Ok(s) => {
+                if s.is_empty() {
                     return Err(HeaderError::HeaderIsEmpty(ANALYZER_HEADER.to_string()).into());
                 }
-                _ => s,
-            },
+                s
+            }
             Err(e) => {
                 tracing::error!("convert analyzer header: {:?}", e);
                 return Err(HeaderError::HeaderIsNotString(ANALYZER_HEADER.to_string()).into());
