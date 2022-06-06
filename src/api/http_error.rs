@@ -3,6 +3,7 @@ use std::{collections::BTreeMap, fmt::Display};
 
 use crate::error::BanError;
 use crate::model::BanTargetConversionError;
+
 use actix_web::body::BoxBody;
 use actix_web::{error::ResponseError, http::StatusCode, HttpResponse};
 use serde::Serialize;
@@ -32,6 +33,32 @@ impl From<BanTargetConversionError> for ErrorResponse {
                 reason: btce.to_string(),
                 details: None,
             },
+        }
+    }
+}
+
+pub enum UnBanRequestConversionError {
+    IPOrUserAgentRequired,
+    PatternUnsupported,
+}
+
+impl Display for UnBanRequestConversionError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            UnBanRequestConversionError::IPOrUserAgentRequired => {
+                "'ip' or 'user-agent' are required"
+            }
+            UnBanRequestConversionError::PatternUnsupported => "only allowed pattern is \"*\"",
+        })
+    }
+}
+
+impl From<UnBanRequestConversionError> for ErrorResponse {
+    fn from(e: UnBanRequestConversionError) -> Self {
+        ErrorResponse {
+            code: 400,
+            reason: e.to_string(),
+            details: None,
         }
     }
 }
@@ -71,6 +98,7 @@ impl From<HeaderError> for ErrorResponse {
         }
     }
 }
+
 impl From<BanError> for ErrorResponse {
     fn from(e: BanError) -> Self {
         match e {
