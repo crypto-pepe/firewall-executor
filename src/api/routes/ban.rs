@@ -45,7 +45,16 @@ pub async fn process_ban(
             });
         }
         Some(s) => match s.to_str() {
-            Ok(s) => s,
+            Ok(s) => match s {
+                "" => {
+                    return Err(ErrorResponse {
+                        code: 400,
+                        reason: format!("{} header required", ANALYZER_HEADER),
+                        details: None,
+                    });
+                }
+                _ => s,
+            },
             Err(e) => {
                 tracing::error!("convert analyzer header: {:?}", e);
                 return Err(ErrorResponse {
