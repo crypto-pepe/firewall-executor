@@ -5,9 +5,7 @@ use tokio::sync::RwLock;
 
 use crate::api::http_error;
 use crate::api::http_error::UnBanRequestConversionError;
-use crate::api::routes::unban::UnBanRequestConversionError::{
-    EmptyTarget, PatternUnsupported,
-};
+use crate::api::routes::unban::UnBanRequestConversionError::{EmptyTarget, PatternUnsupported};
 use crate::ban_hammer::BanHammerDryRunner;
 use crate::model::UnBanEntity;
 
