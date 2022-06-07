@@ -36,25 +36,25 @@ pub async fn process_ban(
     ban_req: web::Json<BanRequest>,
     hammer: Data<RwLock<Box<dyn BanHammerDryRunner + Sync + Send>>>,
 ) -> Result<impl Responder, ErrorResponse> {
-    let anl = match req.headers().get(ANALYZER_HEADER) {
-        None => {
-            return Err(HeaderError::HeaderRequired(ANALYZER_HEADER.to_string()).into());
-        }
-        Some(s) => match s.to_str() {
-            Ok(s) => {
-                if s.is_empty() {
-                    return Err(HeaderError::HeaderIsEmpty(ANALYZER_HEADER.to_string()).into());
-                }
-                s
+    let analyzer = req
+        .headers()
+        .get(ANALYZER_HEADER)
+        .ok_or(HeaderError::HeaderRequired(ANALYZER_HEADER.to_string()).into())
+        .and_then(|s| {
+            s.to_str()
+                .map_err(|_| HeaderError::HeaderIsNotString(ANALYZER_HEADER.to_string()).into())
+        })
+        .and_then(|s| {
+            if s.is_empty() {
+                Err(ErrorResponse::from(HeaderError::HeaderIsEmpty(
+                    ANALYZER_HEADER.to_string(),
+                )))
+            } else {
+                Ok(s)
             }
-            Err(e) => {
-                tracing::error!("convert analyzer header: {:?}", e);
-                return Err(HeaderError::HeaderIsNotString(ANALYZER_HEADER.to_string()).into());
-            }
-        },
-    };
+        })?;
     let hammer = hammer.read().await;
-    let ban = match BanEntity::new(ban_req.0, anl.to_string()) {
+    let ban = match BanEntity::new(ban_req.0, analyzer.to_string()) {
         Ok(b) => b,
         Err(fe) => return Err(fe.into()),
     };
