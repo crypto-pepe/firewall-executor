@@ -38,14 +38,14 @@ impl From<BanTargetConversionError> for ErrorResponse {
 }
 
 pub enum UnBanRequestConversionError {
-    IPOrUserAgentRequired,
+    EmptyTarget,
     PatternUnsupported,
 }
 
 impl Display for UnBanRequestConversionError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str(match self {
-            UnBanRequestConversionError::IPOrUserAgentRequired => {
+            UnBanRequestConversionError::EmptyTarget => {
                 "'ip' or 'user-agent' are required"
             }
             UnBanRequestConversionError::PatternUnsupported => "only allowed pattern is \"*\"",

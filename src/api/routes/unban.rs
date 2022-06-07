@@ -6,7 +6,7 @@ use tokio::sync::RwLock;
 use crate::api::http_error;
 use crate::api::http_error::UnBanRequestConversionError;
 use crate::api::routes::unban::UnBanRequestConversionError::{
-    IPOrUserAgentRequired, PatternUnsupported,
+    EmptyTarget, PatternUnsupported,
 };
 use crate::ban_hammer::BanHammerDryRunner;
 use crate::model::UnBanEntity;
@@ -21,7 +21,7 @@ impl UnBanRequest {
         match &self.target {
             UnBanEntity::Target(t) => {
                 if t.ip.is_none() && t.user_agent.is_none() {
-                    Err(IPOrUserAgentRequired)
+                    Err(EmptyTarget)
                 } else {
                     Ok(())
                 }
