@@ -1,11 +1,11 @@
-pub mod api;
-pub mod ban_hammer;
-pub mod config;
-pub mod dry_runner;
-pub mod error;
-pub mod model;
-pub mod redis;
-pub mod telemetry;
+mod api;
+mod ban_hammer;
+mod config;
+mod dry_runner;
+mod error;
+mod model;
+mod redis;
+mod telemetry;
 
 use api::Server;
 use ban_hammer::redis::RedisBanHammer;
