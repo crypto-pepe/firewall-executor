@@ -23,6 +23,7 @@ impl Display for BanTargetConversionError {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+#[serde(deny_unknown_fields)]
 pub struct BanTarget {
     pub ip: Option<String>,
     pub user_agent: Option<String>,

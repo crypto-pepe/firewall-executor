@@ -12,6 +12,7 @@ use crate::model::{BanEntity, BanTarget};
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
+#[serde(deny_unknown_fields)]
 pub struct BanRequest {
     pub target: Option<BanTarget>,
     pub reason: Option<String>,
