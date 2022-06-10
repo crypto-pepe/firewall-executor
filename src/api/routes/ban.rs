@@ -21,10 +21,9 @@ pub struct BanRequest {
 
 impl Display for BanRequest {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        // Expect because BanRequest derives Serialize
         f.write_str(
             serde_json::to_string(self)
-                .expect("BanRequest Display impl")
+                .map_err(|_| std::fmt::Error)?
                 .as_str(),
         )
     }

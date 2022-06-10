@@ -63,7 +63,11 @@ impl From<UnBanRequestConversionError> for ErrorResponse {
 
 impl Display for ErrorResponse {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(serde_json::to_string(self).unwrap().as_str())
+        f.write_str(
+            serde_json::to_string(self)
+                .map_err(|_| std::fmt::Error)?
+                .as_str(),
+        )
     }
 }
 
