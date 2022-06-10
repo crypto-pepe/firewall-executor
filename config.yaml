@@ -1,0 +1,10 @@
+redis:
+  host: '127.0.0.1'
+  port: 6379
+redis_query_timeout_secs: 2
+redis_keys_prefix: "banned::"
+server:
+  host: '127.0.0.1'
+  port: 8001
+telemetry:
+  svc_name: "firewall-executor"
