@@ -40,14 +40,14 @@ pub async fn process_ban(
     let analyzer = req
         .headers()
         .get(ANALYZER_HEADER)
-        .ok_or_else(|| HeaderError::HeaderRequired(ANALYZER_HEADER.to_string()).into())
+        .ok_or_else(|| HeaderError::Required(ANALYZER_HEADER.to_string()).into())
         .and_then(|s| {
             s.to_str()
-                .map_err(|_| HeaderError::HeaderIsNotString(ANALYZER_HEADER.to_string()).into())
+                .map_err(|_| HeaderError::IsNotString(ANALYZER_HEADER.to_string()).into())
         })
         .and_then(|s| {
             if s.is_empty() {
-                Err(ErrorResponse::from(HeaderError::HeaderIsEmpty(
+                Err(ErrorResponse::from(HeaderError::IsEmpty(
                     ANALYZER_HEADER.to_string(),
                 )))
             } else {

@@ -78,9 +78,9 @@ impl ResponseError for ErrorResponse {
 }
 
 pub enum HeaderError {
-    HeaderRequired(String),
-    HeaderIsEmpty(String),
-    HeaderIsNotString(String),
+    Required(String),
+    IsEmpty(String),
+    IsNotString(String),
 }
 
 impl From<HeaderError> for ErrorResponse {
@@ -88,9 +88,9 @@ impl From<HeaderError> for ErrorResponse {
         ErrorResponse {
             code: 400,
             reason: match e {
-                HeaderError::HeaderRequired(s) => format!("header {} is required", s),
-                HeaderError::HeaderIsEmpty(s) => format!("header {} is empty", s),
-                HeaderError::HeaderIsNotString(s) => format!("header {} is not string", s),
+                HeaderError::Required(s) => format!("header {} is required", s),
+                HeaderError::IsEmpty(s) => format!("header {} is empty", s),
+                HeaderError::IsNotString(s) => format!("header {} is not string", s),
             },
             details: None,
         }
