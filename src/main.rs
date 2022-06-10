@@ -7,7 +7,6 @@ mod model;
 mod redis;
 mod telemetry;
 
-use crate::redis::get_pool;
 use api::Server;
 use ban_hammer::redis::RedisBanHammer;
 use std::io;
@@ -25,7 +24,7 @@ async fn main() -> io::Result<()> {
     let (subscriber, log_filter_handler) = telemetry::get_subscriber(&cfg.telemetry);
     telemetry::init_subscriber(subscriber);
 
-    let redis_pool = match get_pool(&cfg.redis).await {
+    let redis_pool = match redis::get_pool(&cfg.redis).await {
         Ok(p) => p,
         Err(e) => panic!("create redis pool {:?}", e),
     };

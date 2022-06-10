@@ -11,7 +11,7 @@ pub enum BanTargetConversionError {
 }
 
 impl Display for BanTargetConversionError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             BanTargetConversionError::FieldRequired(field_name) => f.write_str(field_name),
             BanTargetConversionError::NotEnoughFields => {
@@ -23,6 +23,7 @@ impl Display for BanTargetConversionError {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+#[serde(deny_unknown_fields)]
 pub struct BanTarget {
     pub ip: Option<String>,
     pub user_agent: Option<String>,
@@ -101,7 +102,7 @@ pub enum UnBanEntity {
 
 impl Display for UnBanEntity {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(serde_json::to_string(self).unwrap().as_str())
+        f.write_str(serde_json::to_string(self).map_err(|_| Error)?.as_str())
     }
 }
 
