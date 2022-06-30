@@ -1,5 +1,5 @@
 use std::fmt::{Debug, Display, Error, Formatter};
-use std::net::Ipv4Addr;
+use std::net::IpAddr;
 
 use num_traits::Zero;
 use serde::{Deserialize, Serialize};
@@ -35,7 +35,7 @@ impl Display for BanTargetConversionError {
 #[serde(rename_all = "snake_case")]
 #[serde(deny_unknown_fields)]
 pub struct BanTarget {
-    pub ip: Option<Ipv4Addr>,
+    pub ip: Option<IpAddr>,
     pub user_agent: Option<String>,
 }
 
@@ -139,7 +139,7 @@ impl Display for UnBanEntity {
 #[cfg(test)]
 mod tests {
     use crate::model::BanTarget;
-    use std::net::Ipv4Addr;
+    use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
     use std::str::FromStr;
 
     struct TestCase {
@@ -148,13 +148,28 @@ mod tests {
     }
 
     #[test]
-    fn target_to_key_ip() {
+    fn target_to_key_ipv4() {
         let tc = TestCase {
             input: BanTarget {
-                ip: Some(Ipv4Addr::from_str("1.1.1.1").unwrap()),
+                ip: Some(IpAddr::V4(Ipv4Addr::from_str("1.1.1.1").unwrap())),
                 user_agent: None,
             },
             want: "ip:1.1.1.1".into(),
+        };
+
+        assert_eq!(tc.input.to_string(), tc.want);
+    }
+
+    #[test]
+    fn target_to_key_ipv6() {
+        let tc = TestCase {
+            input: BanTarget {
+                ip: Some(IpAddr::V6(
+                    Ipv6Addr::from_str("2001:db8:11a3:9d7:1f34:8a2e:7a0:765d").unwrap(),
+                )),
+                user_agent: None,
+            },
+            want: "ip:2001:db8:11a3:9d7:1f34:8a2e:7a0:765d".into(),
         };
 
         assert_eq!(tc.input.to_string(), tc.want);
@@ -177,7 +192,7 @@ mod tests {
     fn target_to_key_ip_and_user_agent() {
         let tc = TestCase {
             input: BanTarget {
-                ip: Some(Ipv4Addr::from_str("1.1.1.1").unwrap()),
+                ip: Some(IpAddr::V4(Ipv4Addr::from_str("1.1.1.1").unwrap())),
                 user_agent: Some("abc".into()),
             },
             want: "ip:1.1.1.1__user_agent:abc".into(),
