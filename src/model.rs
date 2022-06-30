@@ -139,6 +139,8 @@ impl Display for UnBanEntity {
 #[cfg(test)]
 mod tests {
     use crate::model::BanTarget;
+    use std::net::Ipv4Addr;
+    use std::str::FromStr;
 
     struct TestCase {
         pub input: BanTarget,
@@ -149,7 +151,7 @@ mod tests {
     fn target_to_key_ip() {
         let tc = TestCase {
             input: BanTarget {
-                ip: Some("1.1.1.1".into()),
+                ip: Some(Ipv4Addr::from_str("1.1.1.1").unwrap()),
                 user_agent: None,
             },
             want: "ip:1.1.1.1".into(),
@@ -175,7 +177,7 @@ mod tests {
     fn target_to_key_ip_and_user_agent() {
         let tc = TestCase {
             input: BanTarget {
-                ip: Some("1.1.1.1".into()),
+                ip: Some(Ipv4Addr::from_str("1.1.1.1").unwrap()),
                 user_agent: Some("abc".into()),
             },
             want: "ip:1.1.1.1__user_agent:abc".into(),
