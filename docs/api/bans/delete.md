@@ -10,9 +10,9 @@ Unbans all targets or target with provided details.
 
 **Content-Type**: `application/json`
 
-| Field    | Type                                        | Is required | Note                                              |
-|----------|---------------------------------------------|------------|---------------------------------------------------|
-| `target` | `{ ip: string?, user_agent:string? } \| '*'`       | Yes         | Ban target. If target is "*" - unbans all targets |
+| Field    | Type                                        | Is required | Note                                                                          |
+|----------|---------------------------------------------|-------------|-------------------------------------------------------------------------------|
+| `target` | `{ ip: string?, user_agent:string? } \|  '*'`       | Yes         | Ban target. IPv4 and IPv6 are supported If target is "*" - unbans all targets |
 
 **Request examples**
 
