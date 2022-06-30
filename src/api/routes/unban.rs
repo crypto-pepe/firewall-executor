@@ -20,6 +20,12 @@ impl UnBanRequest {
             UnBanEntity::Target(t) => {
                 if t.ip.is_none() && t.user_agent.is_none() {
                     Err(EmptyTarget)
+                } else if let Some(ua) = &t.user_agent {
+                    if ua.is_empty() {
+                        Err(UnBanRequestConversionError::EmptyField(ua.to_string()))
+                    } else {
+                        Ok(())
+                    }
                 } else {
                     Ok(())
                 }

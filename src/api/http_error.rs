@@ -1,12 +1,12 @@
 use std::fmt::{Debug, Formatter};
 use std::{collections::BTreeMap, fmt::Display};
 
-use crate::error::BanError;
-use crate::model::BanTargetConversionError;
-
 use actix_web::body::BoxBody;
 use actix_web::{error::ResponseError, http::StatusCode, HttpResponse};
 use serde::Serialize;
+
+use crate::error::BanError;
+use crate::model::BanTargetConversionError;
 
 #[derive(Debug, Serialize)]
 pub struct ErrorResponse {
@@ -39,14 +39,22 @@ impl From<BanTargetConversionError> for ErrorResponse {
 
 pub enum UnBanRequestConversionError {
     EmptyTarget,
+    EmptyField(String),
     PatternUnsupported,
 }
 
 impl Display for UnBanRequestConversionError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(match self {
-            UnBanRequestConversionError::EmptyTarget => "target requires at lease one descriptor",
-            UnBanRequestConversionError::PatternUnsupported => "only allowed pattern is \"*\"",
+        f.write_str(&*match self {
+            UnBanRequestConversionError::EmptyTarget => {
+                "target requires at lease one descriptor".to_string()
+            }
+            UnBanRequestConversionError::PatternUnsupported => {
+                "only allowed pattern is \"*\"".to_string()
+            }
+            UnBanRequestConversionError::EmptyField(filed_name) => {
+                format!("field {} is empty", filed_name)
+            }
         })
     }
 }
