@@ -28,7 +28,7 @@ impl From<BanTargetConversionError> for ErrorResponse {
                     details: Some(details),
                 }
             }
-            BanTargetConversionError::NotEnoughFields => ErrorResponse {
+            _ => ErrorResponse {
                 code: 400,
                 reason: btce.to_string(),
                 details: None,

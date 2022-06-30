@@ -1,5 +1,7 @@
 use std::fmt::{Debug, Display, Error, Formatter};
+use std::net::Ipv4Addr;
 
+use num_traits::Zero;
 use serde::{Deserialize, Serialize};
 
 use crate::api::routes::BanRequest;
@@ -7,16 +9,24 @@ use crate::api::routes::BanRequest;
 #[derive(Debug, PartialEq)]
 pub enum BanTargetConversionError {
     FieldRequired(String),
+    EmptyField(String),
+    BadTTL,
     NotEnoughFields,
 }
 
 impl Display for BanTargetConversionError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            BanTargetConversionError::FieldRequired(field_name) => f.write_str(field_name),
+            BanTargetConversionError::FieldRequired(field_name) => {
+                f.write_str(&*format!("field {} required", field_name))
+            }
+            BanTargetConversionError::EmptyField(field_name) => {
+                f.write_str(&*format!("field {} is empty", field_name))
+            }
             BanTargetConversionError::NotEnoughFields => {
                 f.write_str("at least on field required: 'ip', 'user_agent'")
             }
+            BanTargetConversionError::BadTTL => f.write_str("ttl must be above 0"),
         }
     }
 }
@@ -25,7 +35,7 @@ impl Display for BanTargetConversionError {
 #[serde(rename_all = "snake_case")]
 #[serde(deny_unknown_fields)]
 pub struct BanTarget {
-    pub ip: Option<String>,
+    pub ip: Option<Ipv4Addr>,
     pub user_agent: Option<String>,
 }
 
@@ -56,6 +66,12 @@ impl BanTarget {
         if self.ip.is_none() && self.user_agent.is_none() {
             return Err(BanTargetConversionError::NotEnoughFields);
         }
+        if let Some(ua) = &self.user_agent {
+            if ua.is_empty() {
+                return Err(BanTargetConversionError::EmptyField(ua.to_string()));
+            }
+        }
+
         Ok(())
     }
 }
@@ -76,10 +92,24 @@ impl BanEntity {
             .ok_or_else(|| BanTargetConversionError::FieldRequired("target".to_string()))?;
         let reason = br
             .reason
-            .ok_or_else(|| BanTargetConversionError::FieldRequired("reason".to_string()))?;
+            .ok_or_else(|| BanTargetConversionError::FieldRequired("reason".to_string()))
+            .and_then(|r| {
+                if r.is_empty() {
+                    Err(BanTargetConversionError::EmptyField("reason".to_string()))
+                } else {
+                    Ok(r)
+                }
+            })?;
         let ttl = br
             .ttl
-            .ok_or_else(|| BanTargetConversionError::FieldRequired("ttl".to_string()))?;
+            .ok_or_else(|| BanTargetConversionError::FieldRequired("ttl".to_string()))
+            .and_then(|t| {
+                if t.is_zero() {
+                    Err(BanTargetConversionError::BadTTL)
+                } else {
+                    Ok(t)
+                }
+            })?;
 
         target.verify()?;
         let target = target.to_string();
